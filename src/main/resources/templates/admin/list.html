@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Students List</title>
+</head>
+<body>
+<h1>Students Management</h1>
+<p>Logged in as: <span th:text="${currentAdmin}"></span></p>
+
+<table class="table">
+  <thead>
+  <tr>
+    <th>Student ID</th>
+    <th>Name</th>
+    <th>Department</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="student : ${students}">
+    <td th:text="${student.studentId}"></td>
+    <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+    <td th:text="${student.department}"></td>
+    <td>
+      <a th:href="@{/admin/students/{id}(id=${student.id})}">View</a>
+      <a th:href="@{/admin/students/{id}/deactivate(id=${student.id})}">Deactivate</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<a th:href="@{/admin/students/new}">Add New Student</a>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:replace="${title}">Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #858796;
+            --success: #1cc88a;
+            --info: #36b9cc;
+            --light: #f8f9fc;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, #224abe 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar .list-group-item {
+            background: transparent;
+            color: rgba(255,255,255,0.8);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .sidebar .list-group-item:hover,
+        .sidebar .list-group-item:focus {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar .list-group-item.active {
+            color: #fff;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1rem 1.35rem;
+            font-weight: 600;
+        }
+
+        .notification-card .card-header {
+            border-left: 0.25rem solid var(--primary);
+        }
+
+        .schedule-card .card-header {
+            border-left: 0.25rem solid var(--success);
+        }
+
+        .list-group-item {
+            padding: 0.75rem 1.25rem;
+        }
+
+        .welcome-header {
+            background-color: white;
+            border-radius: 0.35rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div th:fragment="layout(title, section)">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block sidebar p-0">
+                <div class="list-group list-group-flush">
+                    <a href="/student/dashboard" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-fw fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="/student/profile" class="list-group-item list-group-item-action">
+                        <i class="fas fa-fw fa-user me-2"></i>Account/Profile
+                    </a>
+                    <a href="/student/grades" class="list-group-item list-group-item-action">
+                        <i class="fas fa-fw fa-chart-bar me-2"></i>Grades Viewer
+                    </a>
+                    <a href="/student/schedule" class="list-group-item list-group-item-action">
+                        <i class="fas fa-fw fa-calendar me-2"></i>Class Schedule
+                    </a>
+                    <a href="/student/tuition" class="list-group-item list-group-item-action">
+                        <i class="fas fa-fw fa-dollar-sign me-2"></i>Tuition Balance
+                    </a>
+                    <a href="/student/calendar" class="list-group-item list-group-item-action">
+                        <i class="fas fa-fw fa-calendar-day me-2"></i>Academic Calendar
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto p-4">
+                <div th:replace="${section}"></div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
