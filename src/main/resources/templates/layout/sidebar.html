@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <!-- Add this to ensure Font Awesome loads -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .custom-sidebar {
+        height: 100vh;
+        background: linear-gradient(180deg, #4e73df 0%, #224abe 100%) !important;
+        color: white;
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: fixed; /* Added to ensure sidebar stays fixed */
+        width: 250px; /* Fixed width */
+    }
+
+    .custom-sidebar a.nav-link {
+        color: rgba(255, 255, 255, 0.85) !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        margin: 0.25rem 1rem;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+    }
+
+    .custom-sidebar a.nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+    }
+
+    .custom-sidebar a.nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+    }
+
+    .custom-sidebar i {
+        margin-right: 0.75rem;
+        width: 20px; /* Ensures consistent icon spacing */
+        text-align: center;
+    }
+
+    .sidebar-header {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        padding: 1rem 1.5rem;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .custom-sidebar {
+            height: auto;
+            position: relative;
+            width: 100%;
+        }
+    }
+  </style>
+</head>
+<body>
+<div th:fragment="sidebar">
+  <nav class="custom-sidebar">
+    <div class="sidebar-header">Student Portal</div>
+    <a href="/student/dashboard" class="nav-link active">
+      <i class="fas fa-fw fa-tachometer-alt"></i>Dashboard
+    </a>
+    <a href="/student/profile" class="nav-link">
+      <i class="fas fa-fw fa-user"></i>Account/Profile
+    </a>
+    <a href="/student/grades" class="nav-link">
+      <i class="fas fa-fw fa-chart-bar"></i>Grades Viewer
+    </a>
+    <a href="/student/schedule" class="nav-link">
+      <i class="fas fa-fw fa-calendar"></i>Class Schedule
+    </a>
+    <a href="/student/tuition" class="nav-link">
+      <i class="fas fa-fw fa-dollar-sign"></i>Tuition Balance
+    </a>
+    <a href="/student/calendar" class="nav-link">
+      <i class="fas fa-fw fa-calendar-day"></i>Academic Calendar
+    </a>
+  </nav>
+</div>
+</body>
+</html>
