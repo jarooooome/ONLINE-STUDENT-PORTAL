@@ -40,7 +40,7 @@ public class AdminController {
         setNoCacheHeaders(response);
 
         model.addAttribute("userCount", userService.countUsers());
-        model.addAttribute("studentCount", userService.countByRole("STUDENT"));
+        model.addAttribute("studentCount", userService.countStudentsByActiveStatus(true)); // ✅ Only active
         model.addAttribute("subjectCount", courseService.countActiveCourses());
         model.addAttribute("pendingActions", activityLogService.countPendingActions());
         model.addAttribute("recentActivities", activityLogService.getRecentActivities());

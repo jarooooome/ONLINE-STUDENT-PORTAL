@@ -147,9 +147,7 @@
                 <li th:if="${#authorization.expr('isAnonymous()')}" class="nav-item ms-lg-2">
                     <a th:href="@{/auth/login}" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-in-right me-1"></i>Log In</a>
                 </li>
-                <li th:if="${#authorization.expr('isAnonymous()')}" class="nav-item ms-lg-2">
-                    <a th:href="@{/auth/register}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus me-1"></i>Register</a>
-                </li>
+
 
                 <li th:if="${#authorization.expr('isAuthenticated()')}" class="nav-item dropdown ms-lg-2">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -182,7 +180,7 @@
         <p class="lead mb-4">Manage grades, schedules, announcements, and more — all in one place.</p>
         <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
             <a th:if="${#authorization.expr('isAnonymous()')}" th:href="@{/auth/login}" class="btn btn-primary btn-login-cta"><i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
-            <a th:if="${#authorization.expr('isAnonymous()')}" th:href="@{/auth/register}" class="btn btn-outline-light btn-login-cta"><i class="bi bi-person-plus me-2"></i>Register</a>
+
             <a th:if="${#authorization.expr('isAuthenticated()')}" th:href="@{/dashboard}" class="btn btn-primary btn-login-cta"><i class="bi bi-speedometer2 me-2"></i>Go to Dashboard</a>
         </div>
     </div>

@@ -19,15 +19,15 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository     userRepo;
-    private final PasswordEncoder    encoder;
+    private final UserRepository userRepo;
+    private final PasswordEncoder encoder;
     private final ActivityLogService activityLogService;
 
     public UserService(UserRepository userRepo,
                        PasswordEncoder encoder,
                        ActivityLogService activityLogService) {
-        this.userRepo           = userRepo;
-        this.encoder            = encoder;
+        this.userRepo = userRepo;
+        this.encoder = encoder;
         this.activityLogService = activityLogService;
     }
 
@@ -90,6 +90,11 @@ public class UserService {
 
     public long countByRole(String role) {
         return userRepo.countByRole(role);
+    }
+
+    /** ✅ Count only active/inactive students */
+    public long countStudentsByActiveStatus(boolean isActive) {
+        return userRepo.countByRoleAndActive("STUDENT", isActive);
     }
 
     /* ─────────────────────────── UPDATE / DELETE ─────────────────────────── */

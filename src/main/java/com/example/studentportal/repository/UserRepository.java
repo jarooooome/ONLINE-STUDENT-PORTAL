@@ -12,6 +12,7 @@ import java.util.Optional;
  * <ul>
  *   <li>{@code findByEmail} – look‑up during login / duplicate‑check</li>
  *   <li>{@code countByRole} – dashboard metrics (e.g. number of STUDENTs)</li>
+ *   <li>{@code countByRoleAndActive} – count only active/inactive users of a specific role</li>
  *   <li>{@code findAllByRole} – list all users of a given role</li>
  * </ul>
  */
@@ -24,6 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /* ───────────── Aggregates ─────────── */
 
     long countByRole(String role);
+
+    long countByRoleAndActive(String role, boolean active); // ✅ New method
 
     /* ───────────── Collections ────────── */
 

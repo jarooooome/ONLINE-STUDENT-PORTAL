@@ -18,24 +18,24 @@ public class AdminStudentController {
         this.userService = userService;
     }
 
-    /* list */
+    /* ─────────────── LIST: /admin/students ─────────────── */
     @GetMapping
     public String listStudents(Model model, Principal principal) {
         model.addAttribute("students", userService.findByRole("STUDENT"));
         model.addAttribute("currentAdmin", principal.getName());
-        return "admin/students/list";
+        return "admin/studentrecords";          // 👉 matches studentrecords.html
     }
 
-    /* view */
+    /* ─────────────── VIEW: /admin/students/{id} ────────── */
     @GetMapping("/{id}")
     public String viewStudent(@PathVariable Long id, Model model) {
         User student = userService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid student ID: " + id));
         model.addAttribute("student", student);
-        return "admin/students/view";
+        return "admin/students/view";           // keep your view.html
     }
 
-    /* new form */
+    /* ─────────────── FORM: /admin/students/new ─────────── */
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         User student = new User();
@@ -44,7 +44,7 @@ public class AdminStudentController {
         return "admin/students/create";
     }
 
-    /* create */
+    /* ─────────────── CREATE (POST) ─────────────────────── */
     @PostMapping
     public String createStudent(@ModelAttribute("student") User student,
                                 @RequestParam(required = false) String department) {
@@ -53,12 +53,22 @@ public class AdminStudentController {
         return "redirect:/admin/students";
     }
 
-    /* deactivate */
+    /* ─────────────── DEACTIVATE ────────────────────────── */
     @PostMapping("/{id}/deactivate")
     public String deactivateStudent(@PathVariable Long id) {
         User u = userService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid student ID: " + id));
         u.setActive(false);
+        userService.updateUser(u);
+        return "redirect:/admin/students";
+    }
+
+    /* ─────────────── ACTIVATE ──────────────────────────── */
+    @PostMapping("/{id}/activate")
+    public String activateStudent(@PathVariable Long id) {
+        User u = userService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid student ID: " + id));
+        u.setActive(true);
         userService.updateUser(u);
         return "redirect:/admin/students";
     }

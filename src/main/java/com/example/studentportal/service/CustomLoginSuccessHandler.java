@@ -9,9 +9,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 @Component
 public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
+
+    private static final Logger logger = Logger.getLogger(CustomLoginSuccessHandler.class.getName());
 
     @Override
     public void onAuthenticationSuccess(
@@ -22,19 +25,26 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
+        String redirectUrl = null;
+
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
 
-            if (role.equals("ROLE_ADMIN")) {
-                response.sendRedirect("/admin/dashboard");
-                return;
-            } else if (role.equals("ROLE_STUDENT")) {
-                response.sendRedirect("/student/dashboard");
-                return;
+            if ("ROLE_ADMIN".equals(role)) {
+                redirectUrl = "/admin/dashboard";
+                break;
+            } else if ("ROLE_STUDENT".equals(role)) {
+                redirectUrl = "/student/dashboard";
+                break;
             }
         }
 
-        // Fallback if no role matched
-        response.sendRedirect("/dashboard");
+        if (redirectUrl == null) {
+            logger.warning("No known role found for user: " + authentication.getName());
+            redirectUrl = "/dashboard"; // fallback route
+        }
+
+        logger.info("Redirecting '" + authentication.getName() + "' to " + redirectUrl);
+        response.sendRedirect(redirectUrl);
     }
 }
