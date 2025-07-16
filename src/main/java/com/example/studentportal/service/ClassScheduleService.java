@@ -1,7 +1,7 @@
 package com.example.studentportal.service;
 
 import com.example.studentportal.model.ClassSchedule;
-import com.example.studentportal.model.Student;
+import com.example.studentportal.model.User;
 import com.example.studentportal.repository.ClassScheduleRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +23,12 @@ public class ClassScheduleService {
     }
 
     // Get all schedules for a specific student
-    public List<ClassSchedule> getScheduleForStudent(Student student) {
+    public List<ClassSchedule> getScheduleForStudent(User student) {
         return classScheduleRepository.findByStudent(student);
     }
 
     // Get today’s schedule for a student
-    public List<ClassSchedule> getScheduleForStudentByDay(Student student, DayOfWeek day) {
+    public List<ClassSchedule> getScheduleForStudentByDay(User student, DayOfWeek day) {
         return classScheduleRepository.findByStudentAndDay(student, day);
     }
 }

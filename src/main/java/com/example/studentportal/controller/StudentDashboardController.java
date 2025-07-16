@@ -2,10 +2,10 @@ package com.example.studentportal.controller;
 
 import com.example.studentportal.model.ClassSchedule;
 import com.example.studentportal.model.Notification;
-import com.example.studentportal.model.Student;
+import com.example.studentportal.model.User;
 import com.example.studentportal.service.ClassScheduleService;
 import com.example.studentportal.service.NotificationService;
-import com.example.studentportal.service.StudentService;
+import com.example.studentportal.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,14 +20,14 @@ import java.util.Locale;
 @Controller
 public class StudentDashboardController {
 
-    private final StudentService studentService;
+    private final UserService userService;
     private final NotificationService notificationService;
     private final ClassScheduleService classScheduleService;
 
-    public StudentDashboardController(StudentService studentService,
+    public StudentDashboardController(UserService userService,
                                       NotificationService notificationService,
                                       ClassScheduleService classScheduleService) {
-        this.studentService = studentService;
+        this.userService = userService;
         this.notificationService = notificationService;
         this.classScheduleService = classScheduleService;
     }
@@ -36,18 +36,17 @@ public class StudentDashboardController {
     public String studentDashboard(Model model, Principal principal) {
         String studentEmail = principal.getName();
 
-        // Get student
-        Student student = studentService.getStudentByEmail(studentEmail)
+        // Get user and validate role
+        User student = userService.findByEmail(studentEmail)
+                .filter(u -> "STUDENT".equalsIgnoreCase(u.getRole()))
                 .orElseThrow(() -> new RuntimeException("Student not found with email: " + studentEmail));
 
-        // Fetch real-time notifications visible to STUDENT or ALL
+        // Notifications for STUDENT
         List<Notification> notifications = notificationService.getNotificationsForRole("STUDENT");
 
-        // Fetch today's class schedule
+        // Today’s class schedule
         DayOfWeek today = LocalDate.now().getDayOfWeek();
         List<ClassSchedule> todaysSchedules = classScheduleService.getScheduleForStudentByDay(student, today);
-
-        // Format day name with proper casing (Thursday instead of THURSDAY)
         String formattedDay = today.getDisplayName(TextStyle.FULL, Locale.ENGLISH);
 
         model.addAttribute("student", student);

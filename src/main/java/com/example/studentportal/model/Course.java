@@ -2,6 +2,7 @@ package com.example.studentportal.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.List;
 
 @Data
@@ -21,5 +22,5 @@ public class Course {
     private boolean active = true;
 
     @ManyToMany(mappedBy = "courses")
-    private List<Student> students;
+    private List<User> students;  // ✅ Replace Student with User
 }

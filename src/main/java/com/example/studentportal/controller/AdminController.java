@@ -1,9 +1,14 @@
 package com.example.studentportal.controller;
 
+import com.example.studentportal.model.User;
 import com.example.studentportal.service.*;
+
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.security.Principal;
 
 @Controller
@@ -11,32 +16,92 @@ import java.security.Principal;
 public class AdminController {
 
     private final UserService userService;
-    private final StudentService studentService;
     private final CourseService courseService;
     private final ActivityLogService activityLogService;
 
-    // Constructor injection
     public AdminController(UserService userService,
-                           StudentService studentService,
                            CourseService courseService,
                            ActivityLogService activityLogService) {
         this.userService = userService;
-        this.studentService = studentService;
         this.courseService = courseService;
         this.activityLogService = activityLogService;
     }
 
+    /* ───────────────────────── Admin Dashboard ───────────────────────── */
     @GetMapping("/dashboard")
-    public String adminDashboard(Model model, Principal principal) {
-        // Get counts for dashboard
+    public String adminDashboard(Model model,
+                                 Principal principal,
+                                 HttpServletResponse response) throws IOException {
+        if (principal == null) {
+            response.sendRedirect("/auth/login");
+            return null;
+        }
+
+        setNoCacheHeaders(response);
+
         model.addAttribute("userCount", userService.countUsers());
-        model.addAttribute("studentCount", studentService.countActiveStudents());
+        model.addAttribute("studentCount", userService.countByRole("STUDENT"));
         model.addAttribute("subjectCount", courseService.countActiveCourses());
         model.addAttribute("pendingActions", activityLogService.countPendingActions());
-
-        // Get recent activities
         model.addAttribute("recentActivities", activityLogService.getRecentActivities());
 
         return "admin/admindashboard";
+    }
+
+    /* ───────────────────────── Manage Users ───────────────────────── */
+    @GetMapping("/users")
+    public String manageUsers(Model model,
+                              Principal principal,
+                              HttpServletResponse response) throws IOException {
+        if (principal == null) {
+            response.sendRedirect("/auth/login");
+            return null;
+        }
+
+        setNoCacheHeaders(response);
+
+        model.addAttribute("users", userService.findAllUsers());
+        return "admin/manageuser";
+    }
+
+    /* ───────────────────── Show Add User Form ───────────────────── */
+    @GetMapping("/users/add")
+    public String showAddUserForm(Model model,
+                                  Principal principal,
+                                  HttpServletResponse response) throws IOException {
+        if (principal == null) {
+            response.sendRedirect("/auth/login");
+            return null;
+        }
+
+        setNoCacheHeaders(response);
+
+        model.addAttribute("user", new User());
+        return "admin/adduser";
+    }
+
+    /* ───────────────────── Handle Add User Submission ───────────────────── */
+    @PostMapping("/users/save")
+    public String saveUser(@ModelAttribute("user") User user,
+                           @RequestParam(value = "department", required = false) String department,
+                           Principal principal,
+                           HttpServletResponse response) throws IOException {
+        if (principal == null) {
+            response.sendRedirect("/auth/login");
+            return null;
+        }
+
+        setNoCacheHeaders(response);
+
+        userService.saveUser(user, department);
+
+        return "redirect:/admin/users";
+    }
+
+    /* ───────────────────────── Utility Method ───────────────────────── */
+    private void setNoCacheHeaders(HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
     }
 }

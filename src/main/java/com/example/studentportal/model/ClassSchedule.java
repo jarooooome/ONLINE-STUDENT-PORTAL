@@ -23,7 +23,7 @@ public class ClassSchedule {
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    private Student student;
+    private User student;
 
     // === Getters and Setters ===
 
@@ -83,11 +83,11 @@ public class ClassSchedule {
         this.room = room;
     }
 
-    public Student getStudent() {
+    public User getStudent() {
         return student;
     }
 
-    public void setStudent(Student student) {
+    public void setStudent(User student) {
         this.student = student;
     }
 }
