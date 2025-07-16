@@ -1,61 +1,406 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Student Portal - Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Custom Styles -->
     <style>
+        :root {
+            --hero-min-height: 80vh;
+            --glass-bg: rgba(255,255,255,.05);
+            --glass-border: rgba(255,255,255,.15);
+            --glass-blur: 10px;
+        }
+        /* Smooth fade-in */
+        body {
+            opacity: 0;
+            transition: opacity .25s ease-in;
+        }
+        body.js-loaded {
+            opacity: 1;
+        }
+        /* Hero */
         .hero-section {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/campus.jpg');
-            background-size: cover;
-            background-position: center;
-            height: 80vh;
-            color: white;
+            position: relative;
+            min-height: var(--hero-min-height);
+            background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)), url('/images/campus.jpg') center/cover no-repeat;
+            color: #fff;
+            overflow: hidden;
         }
-        .btn-login {
-            padding: 10px 30px;
-            font-weight: 600;
-            border: 2px solid white;
+        .hero-shape-1, .hero-shape-2 {
+            position:absolute; border-radius:50%; filter:blur(75px); opacity:.35; pointer-events:none;
         }
+        .hero-shape-1 { width:300px; height:300px; background:#6366f1; top:-50px; left:-50px; }
+        .hero-shape-2 { width:400px; height:400px; background:#8b5cf6; bottom:-100px; right:-100px; }
+        .btn-login-cta {
+            padding:.85rem 2.5rem; font-weight:600; border-width:2px;
+        }
+        /* Glass cards */
+        .glass-card {
+            background:var(--glass-bg);
+            border:1px solid var(--glass-border);
+            backdrop-filter:blur(var(--glass-blur));
+            -webkit-backdrop-filter:blur(var(--glass-blur));
+            transition:transform .15s ease, box-shadow .15s ease;
+        }
+        .glass-card:hover {
+            transform:translateY(-4px) scale(1.01);
+            box-shadow:0 0 0 1px rgba(255,255,255,.1),0 .5rem 1rem rgba(0,0,0,.6);
+        }
+        /* Announcement list */
+        .announcement-item + .announcement-item { border-top:1px solid var(--glass-border); }
+        .announcement-item:hover { background:rgba(255,255,255,.03); }
+        /* Upcoming Events timeline */
+        .timeline {
+            position:relative; margin-left:1.25rem; padding-left:1.25rem;
+        }
+        .timeline::before {
+            content:""; position:absolute; inset-block-start:0; inset-block-end:0; inset-inline-start:0; width:2px; background:rgba(255,255,255,.2);
+        }
+        .timeline-item { position:relative; margin-bottom:1.5rem; }
+        .timeline-item::before {
+            content:""; position:absolute; left:-1.25rem; top:.25rem; width:.75rem; height:.75rem; border-radius:50%; background:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,.35);
+        }
+        /* Footer links */
+        .footer-links a { color:rgba(255,255,255,.7); text-decoration:none; }
+        .footer-links a:hover { color:#fff; text-decoration:underline; }
+        /* Dark-mode toggle icon wiggle */
+        #themeToggleBtn:active { transform:scale(.9) rotate(-10deg); }
+
+
+
+    .gradient-divider {
+        height: 4px;
+        width: 80px;
+        margin: 2rem auto;
+        background: linear-gradient(90deg, #0d6efd, #6610f2);
+        border-radius: 2px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    .glass-card {
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 0 20px rgba(0,0,0,.4);
+    }
+    .icon-large {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
     </style>
 </head>
 <body>
+<a class="visually-hidden-focusable" href="#mainContent">Skip to main content</a>
+
+<!-- Top Alert (optional; shows system-wide notices) -->
+<div th:if="${topNotice != null}" class="alert alert-warning text-center rounded-0 mb-0">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <span th:text="${topNotice}">Important system notice goes here.</span>
+</div>
+
 <!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top border-bottom border-secondary-subtle">
     <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="bi bi-book"></i> Student Portal
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/" th:href="@{/}">
+            <i class="bi bi-mortarboard"></i>
+            <span>Student Portal</span>
         </a>
-        <div class="d-flex">
-            <a th:href="@{/auth/login}" class="btn btn-outline-light">
-                <i class="bi bi-box-arrow-in-right"></i> Log In
-            </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#announcements">Announcements</a></li>
+                <li class="nav-item"><a class="nav-link" href="#events">Schedule</a></li>
+                <li class="nav-item"><a class="nav-link" href="#support">Support</a></li>
+
+                <!-- Theme Toggle -->
+                <li class="nav-item d-flex align-items-center ms-lg-3 me-lg-2">
+                    <button id="themeToggleBtn" type="button" class="btn btn-sm btn-outline-light" title="Toggle light/dark mode" aria-label="Toggle theme">
+                        <i class="bi bi-moon-stars" id="themeToggleIcon"></i>
+                    </button>
+                </li>
+
+                <!-- Auth Buttons -->
+                <li th:if="${#authorization.expr('isAnonymous()')}" class="nav-item ms-lg-2">
+                    <a th:href="@{/auth/login}" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-in-right me-1"></i>Log In</a>
+                </li>
+                <li th:if="${#authorization.expr('isAnonymous()')}" class="nav-item ms-lg-2">
+                    <a th:href="@{/auth/register}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus me-1"></i>Register</a>
+                </li>
+
+                <li th:if="${#authorization.expr('isAuthenticated()')}" class="nav-item dropdown ms-lg-2">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span th:text="${#authentication.name}">student@demo.edu</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/dashboard}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person-vcard me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" th:href="@{/settings}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/auth/logout}" method="post" class="px-3 py-1">
+                                <button type="submit" class="btn btn-sm btn-danger w-100"><i class="bi bi-box-arrow-right me-1"></i>Log Out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
 
-<!-- Hero Section with Login CTA -->
-<div class="hero-section d-flex align-items-center justify-content-center text-center">
-    <div class="container">
-        <h1 class="display-4 fw-bold mb-4">Welcome to Student Portal</h1>
-        <p class="lead mb-5">Manage your academic journey with ease</p>
-        <div>
-            <a th:href="@{/auth/login}" class="btn btn-light btn-login">
-                <i class="bi bi-box-arrow-in-right"></i> Login to Dashboard
-            </a>
+<!-- Hero Section -->
+<header class="hero-section d-flex align-items-center text-center">
+    <span class="hero-shape-1"></span>
+    <span class="hero-shape-2"></span>
+    <div class="container position-relative">
+        <h1 class="display-4 fw-bold mb-3">Welcome to <span class="text-primary">Student Portal</span></h1>
+        <p class="lead mb-4">Manage grades, schedules, announcements, and more — all in one place.</p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+            <a th:if="${#authorization.expr('isAnonymous()')}" th:href="@{/auth/login}" class="btn btn-primary btn-login-cta"><i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+            <a th:if="${#authorization.expr('isAnonymous()')}" th:href="@{/auth/register}" class="btn btn-outline-light btn-login-cta"><i class="bi bi-person-plus me-2"></i>Register</a>
+            <a th:if="${#authorization.expr('isAuthenticated()')}" th:href="@{/dashboard}" class="btn btn-primary btn-login-cta"><i class="bi bi-speedometer2 me-2"></i>Go to Dashboard</a>
         </div>
     </div>
-</div>
+</header>
+
+<main id="mainContent">
+    <!-- Quick Stats (visible when logged in) -->
+    <section th:if="${#authorization.expr('isAuthenticated()')}" class="py-5 border-bottom border-secondary-subtle">
+        <div class="container">
+            <div class="row g-4 text-center">
+                <div class="col-6 col-md-3">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <i class="bi bi-clipboard-check display-6 text-primary mb-2"></i>
+                        <h6 class="text-uppercase small mb-1">Completed Units</h6>
+                        <div class="fs-4 fw-bold" th:text="${completedUnits}">36</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <i class="bi bi-calendar-event display-6 text-info mb-2"></i>
+                        <h6 class="text-uppercase small mb-1">Upcoming Exams</h6>
+                        <div class="fs-4 fw-bold" th:text="${upcomingExamCount}">2</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <i class="bi bi-megaphone display-6 text-warning mb-2"></i>
+                        <h6 class="text-uppercase small mb-1">New Announcements</h6>
+                        <div class="fs-4 fw-bold" th:text="${newAnnouncementCount}">5</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <i class="bi bi-chat-dots display-6 text-success mb-2"></i>
+                        <h6 class="text-uppercase small mb-1">Unread Messages</h6>
+                        <div class="fs-4 fw-bold" th:text="${unreadMessageCount}">3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Highlights -->
+    <section id="features" class="py-6 py-md-7 mb-6 border-bottom border-secondary-subtle text-center">
+        <div class="gradient-divider"></div>
+
+        <div class="container mb-4 text-center">
+            <h2 class="fw-bold">What You Can Do</h2>
+            <p class="text-secondary">Everything you need for your academic journey.</p>
+        </div>
+
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <i class="bi bi-person-badge-fill text-primary icon-large"></i>
+                        <h5 class="fw-semibold mb-2">Profile</h5>
+                        <p class="text-secondary small mb-0">Update your contact info, photo, and account settings.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <i class="bi bi-bar-chart-line-fill text-success icon-large"></i>
+                        <h5 class="fw-semibold mb-2">Grades</h5>
+                        <p class="text-secondary small mb-0">Track performance across subjects and exams.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <i class="bi bi-calendar2-week-fill text-info icon-large"></i>
+                        <h5 class="fw-semibold mb-2">Class Schedule</h5>
+                        <p class="text-secondary small mb-0">View daily and semester schedules with ease.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <i class="bi bi-wallet2 text-warning icon-large"></i>
+                        <h5 class="fw-semibold mb-2">Tuition Balance</h5>
+                        <p class="text-secondary small mb-0">Check outstanding balances and payment history.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="glass-card p-4 h-100 text-center">
+                        <i class="bi bi-calendar-event text-danger icon-large"></i>
+                        <h5 class="fw-semibold mb-2">Academic Calendar</h5>
+                        <p class="text-secondary small mb-0">Stay on top of academic events and holidays.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Announcements Preview -->
+    <section id="announcements" class="py-6 mb-6 bg-body-secondary bg-opacity-25 border-top border-bottom border-secondary-subtle text-center">
+        <div class="gradient-divider"></div>
+
+        <div class="container mb-4 text-center">
+            <h2 class="fw-bold">Latest Announcements</h2>
+            <p class="text-secondary">Never miss important updates.</p>
+        </div>
+        <div class="container">
+            <div class="glass-card rounded-4 p-0 overflow-hidden">
+                <ul class="list-unstyled mb-0">
+                    <!-- Example static item; repeated dynamically -->
+                    <li class="announcement-item p-4" th:each="ann,annStat : ${announcements}" th:classappend="${annStat.index % 2 == 0} ? 'bg-transparent' : 'bg-body-tertiary'">
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                            <div class="text-start">
+                                <h6 class="fw-semibold mb-1" th:text="${ann.title}">Enrollment for SY 2025-2026 now open!</h6>
+                                <p class="small mb-0 text-secondary" th:text="${ann.summary}">Please complete enrollment before Aug 10.</p>
+                            </div>
+                            <div class="text-md-end small text-secondary">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                <span th:text="${#temporals.format(ann.date,'MMM d, yyyy')}">Jul 10, 2025</span>
+                            </div>
+                        </div>
+                        <a th:href="@{/announcements/{id}(id=${ann.id})}" class="stretched-link" aria-label="Read full announcement"></a>
+                    </li>
+                    <!-- If no announcements -->
+                    <li th:if="${#lists.isEmpty(announcements)}" class="p-4 text-center text-secondary">No announcements available.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Support / Contact -->
+    <section id="support" class="py-6 mb-6 bg-body-secondary bg-opacity-25 border-top border-bottom border-secondary-subtle text-center">
+        <div class="gradient-divider"></div>
+
+        <div class="container text-center mb-4">
+            <h2 class="fw-bold">Need Help?</h2>
+            <p class="text-secondary">We're here to support you.</p>
+        </div>
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="glass-card rounded-4 p-4 h-100 text-center">
+                        <i class="bi bi-question-circle-fill display-5 text-info mb-3"></i>
+                        <h5 class="fw-semibold mb-2">FAQs</h5>
+                        <p class="text-secondary small mb-3">Find quick answers to common questions.</p>
+                        <a th:href="@{/support/faqs}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    </section>
+
+</main>
 
 <!-- Footer -->
-<footer class="bg-dark text-white text-center py-4 mt-auto">
+<footer class="bg-dark text-white text-center text-md-start pt-5 pb-4 mt-auto">
     <div class="container">
-        <p class="mb-0">© 2025 Student Portal. All rights reserved.</p>
+        <div class="row gy-4">
+            <div class="col-md-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-mortarboard me-2"></i>Student Portal</h5>
+                <p class="small text-secondary">A unified academic gateway for students, faculty, and administrators.</p>
+            </div>
+            <div class="col-6 col-md-2 footer-links">
+                <h6 class="fw-semibold">Portal</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/dashboard}">Dashboard</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-2 footer-links">
+                <h6 class="fw-semibold">Support</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li><a th:href="@{/support/faqs}">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 footer-links">
+                <h6 class="fw-semibold">Account</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li th:if="${#authorization.expr('isAnonymous()')}"><a th:href="@{/auth/login}">Log In</a></li>
+                    <li th:if="${#authorization.expr('isAnonymous()')}"><a th:href="@{/auth/register}">Register</a></li>
+                    <li th:if="${#authorization.expr('isAuthenticated()')}"><a th:href="@{/profile}">Profile</a></li>
+                    <li th:if="${#authorization.expr('isAuthenticated()')}"><a th:href="@{/settings}">Settings</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4 border-secondary-subtle">
+        <div class="text-center small text-secondary">© 2025 Student Portal. All rights reserved.</div>
     </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9wjP5O2hb6iY9OVP1l5VUhQIcKcXrYNIp0hK2v9c" crossorigin="anonymous"></script>
+<script>
+    // Reveal body after CSS + JS load (simple fade-in)
+    window.addEventListener('DOMContentLoaded', function(){
+        document.body.classList.add('js-loaded');
+    });
+
+    // Theme toggle: dark / light persisted in localStorage
+    (function(){
+        const STORAGE_KEY = 'sp-theme';
+        const root = document.documentElement; // <html>
+        const btn = document.getElementById('themeToggleBtn');
+        const icon = document.getElementById('themeToggleIcon');
+
+        function apply(theme){
+            root.setAttribute('data-bs-theme', theme);
+            if(icon){
+                icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars';
+            }
+            localStorage.setItem(STORAGE_KEY, theme);
+        }
+        function current(){
+            return localStorage.getItem(STORAGE_KEY) || root.getAttribute('data-bs-theme') || 'dark';
+        }
+        function toggle(){
+            apply(current() === 'dark' ? 'light' : 'dark');
+        }
+        // init
+        apply(current());
+        if(btn){ btn.addEventListener('click', toggle); }
+    })();
+</script>
 </body>
 </html>
