@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,50 +29,59 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf(AbstractHttpConfigurer::disable)
 
-                /* ─────────── Authorisation rules ─────────── */
+                // Cache and frame options
+                .headers(headers -> headers
+                        .cacheControl(HeadersConfigurer.CacheControlConfig::disable)
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                )
+
+                // Session management
+                .sessionManagement(session -> session
+                        .invalidSessionUrl("/auth/login?invalid-session=true")
+                        .maximumSessions(1)
+                        .expiredUrl("/auth/login?session-expired=true")
+                )
+
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/",                   // landing page
-                                "/auth/**",            // login / register
+                                "/",
+                                "/index",
+                                "/auth/**",
                                 "/css/**", "/js/**", "/images/**",
                                 "/error"
                         ).permitAll()
-
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/student/**").hasAuthority("ROLE_STUDENT")
-
-                        /* /dashboard requires any authenticated user
-                           (redirect controller sends to admin or student area) */
                         .requestMatchers("/dashboard").authenticated()
-
                         .anyRequest().authenticated()
                 )
 
-                /* ─────────── Form‑login setup ─────────── */
+                // Form login
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .successHandler(loginSuccessHandler)     // role‑aware redirect
+                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler(loginSuccessHandler)
                         .failureUrl("/auth/login?error=true")
                         .permitAll()
                 )
 
-                /* ─────────── Logout setup ─────────── */
+                // Logout configuration
                 .logout(logout -> logout
-                        .logoutUrl("/auth/logout")
+                        .logoutUrl("/auth/logout")  // Simple string-based configuration
                         .logoutSuccessUrl("/auth/login?logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "remember-me")
                 )
 
-                /* ─────────── Register CustomUserDetailsService ─────────── */
+                // User details service
                 .userDetailsService(userDetailsService);
 
         return http.build();
