@@ -59,7 +59,8 @@
     <main class="col-md-10 p-4">
       <h2 class="mb-4">Add New Subject</h2>
 
-      <form th:action="@{/admin/subjects/add}" th:object="${subject}" method="post" class="card shadow-sm p-4">
+      <!-- ✅ Corrected form action -->
+      <form th:action="@{/admin/subjects/save}" th:object="${subject}" method="post" class="card shadow-sm p-4">
         <div class="mb-3">
           <label for="code" class="form-label">Subject Code</label>
           <input type="text" th:field="*{code}" id="code" class="form-control" required>
@@ -82,8 +83,6 @@
             <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.title} + ' (' + ${c.code} + ')'"></option>
           </select>
         </div>
-
-
 
         <button type="submit" class="btn btn-success">
           <i class="fas fa-check me-1"></i> Save Subject
