@@ -1,5 +1,6 @@
 package com.example.studentportal.model;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,39 +9,56 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "sections")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Section {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name; // e.g., 1A, 2B
+    @Column(nullable = false)
+    private String name; // e.g., "A", "B", "C"
 
-    private int yearLevel; // e.g., 1 for 1st Year, 2 for 2nd Year, etc.
+    @Column(name = "year_level", nullable = false)
+    private Integer yearLevel;
 
     @Column(columnDefinition = "boolean default true")
     private boolean active = true;
 
-    // Each Section belongs to one Course (e.g., BSIT)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
+    @JsonBackReference // Breaks the infinite loop
     private Course course;
 
-    // Optional: One section can have many subjects assigned
     @ManyToMany
     @JoinTable(
             name = "section_subjects",
             joinColumns = @JoinColumn(name = "section_id"),
             inverseJoinColumns = @JoinColumn(name = "subject_id")
     )
+    @JsonManagedReference
     private List<Subject> subjects;
 
-    // Optional: One section can be handled by multiple instructors (e.g., per subject)
     @ManyToMany
     @JoinTable(
             name = "section_instructors",
             joinColumns = @JoinColumn(name = "section_id"),
             inverseJoinColumns = @JoinColumn(name = "instructor_id")
     )
+    @JsonManagedReference
     private List<Instructor> instructors;
+
+    // Custom toString() to avoid circular references in logs
+    @Override
+    public String toString() {
+        return "Section{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", yearLevel=" + yearLevel +
+                ", active=" + active +
+                ", courseId=" + (course != null ? course.getId() : null) +
+                '}';
+    }
 }

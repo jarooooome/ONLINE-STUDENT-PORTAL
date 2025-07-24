@@ -9,13 +9,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Central service for all user‑related CRUD operations.
- * <p>
- * <b>NOTE</b>: the application now keeps <em>one</em> table – <b>users</b> – that
- * contains every column needed for both admins and students
- * ( studentId, department, enrollmentDate, active …).
- */
 @Service
 public class UserService {
 
@@ -32,14 +25,7 @@ public class UserService {
     }
 
     /* ─────────────────────────── CREATE ─────────────────────────── */
-
-    /**
-     * Persists a new user.
-     * If the role is STUDENT it also fills student‑specific columns (studentId, department, enrollmentDate, active).
-     * @param department may be null; defaults to “Undeclared”
-     */
-    public User saveUser(User user, String department) {
-
+    public User saveUser(User user) {
         if (userRepo.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists: " + user.getEmail());
         }
@@ -48,12 +34,15 @@ public class UserService {
 
         if ("STUDENT".equalsIgnoreCase(user.getRole())) {
             user.setStudentId("STU" + System.currentTimeMillis());
-            user.setDepartment((department == null || department.isBlank()) ? "Undeclared" : department);
             user.setEnrollmentDate(LocalDate.now());
             user.setActive(true);
+
+            // Validate course is selected for students
+            if (user.getCourse() == null) {
+                throw new IllegalArgumentException("Course is required for students");
+            }
         } else {
             user.setStudentId(null);
-            user.setDepartment(null);
             user.setEnrollmentDate(null);
             user.setActive(true);
         }
@@ -61,13 +50,7 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    /** Convenience overload when callers don’t supply department. */
-    public User saveUser(User user) {
-        return saveUser(user, null);
-    }
-
     /* ─────────────────────────── READ ─────────────────────────── */
-
     public Optional<User> findById(Long id) {
         return userRepo.findById(id);
     }
@@ -92,13 +75,11 @@ public class UserService {
         return userRepo.countByRole(role);
     }
 
-    /** ✅ Count only active/inactive students */
     public long countStudentsByActiveStatus(boolean isActive) {
         return userRepo.countByRoleAndActive("STUDENT", isActive);
     }
 
     /* ─────────────────────────── UPDATE / DELETE ─────────────────────────── */
-
     public User updateUser(User user) {
         return userRepo.save(user);
     }

@@ -2,10 +2,10 @@ package com.example.studentportal.controller;
 
 import com.example.studentportal.model.User;
 import com.example.studentportal.service.UserService;
+import com.example.studentportal.service.CourseService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 
 @Controller
@@ -13,9 +13,12 @@ import java.security.Principal;
 public class AdminStudentController {
 
     private final UserService userService;
+    private final CourseService courseService;
 
-    public AdminStudentController(UserService userService) {
+    public AdminStudentController(UserService userService,
+                                  CourseService courseService) {
         this.userService = userService;
+        this.courseService = courseService;
     }
 
     /* ─────────────── LIST: /admin/students ─────────────── */
@@ -23,7 +26,7 @@ public class AdminStudentController {
     public String listStudents(Model model, Principal principal) {
         model.addAttribute("students", userService.findByRole("STUDENT"));
         model.addAttribute("currentAdmin", principal.getName());
-        return "admin/studentrecords";          // 👉 matches studentrecords.html
+        return "admin/studentrecords";
     }
 
     /* ─────────────── VIEW: /admin/students/{id} ────────── */
@@ -32,7 +35,7 @@ public class AdminStudentController {
         User student = userService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid student ID: " + id));
         model.addAttribute("student", student);
-        return "admin/students/view";           // keep your view.html
+        return "admin/students/view";
     }
 
     /* ─────────────── FORM: /admin/students/new ─────────── */
@@ -41,15 +44,15 @@ public class AdminStudentController {
         User student = new User();
         student.setRole("STUDENT");
         model.addAttribute("student", student);
+        model.addAttribute("courses", courseService.findAllActiveCourses());
         return "admin/students/create";
     }
 
     /* ─────────────── CREATE (POST) ─────────────────────── */
     @PostMapping
-    public String createStudent(@ModelAttribute("student") User student,
-                                @RequestParam(required = false) String department) {
+    public String createStudent(@ModelAttribute("student") User student) {
         student.setRole("STUDENT");
-        userService.saveUser(student, department);
+        userService.saveUser(student);
         return "redirect:/admin/students";
     }
 

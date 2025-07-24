@@ -20,15 +20,41 @@ public class SectionService {
         return sectionRepository.findByActiveTrue();
     }
 
+    public List<Section> findByCourseIdAndYearLevel(Long courseId, Integer yearLevel) {
+        return sectionRepository.findByCourseIdAndYearLevel(courseId, yearLevel);
+    }
+
+    // Additional method if you need String input from controllers
+    public List<Section> findByCourseIdAndYearLevelString(Long courseId, String yearLevelString) {
+        try {
+            Integer yearLevel = Integer.parseInt(yearLevelString);
+            return sectionRepository.findByCourseIdAndYearLevel(courseId, yearLevel);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Year level must be a valid number");
+        }
+    }
+
+    public List<Section> findByCourseId(Long courseId) {
+        return sectionRepository.findByCourseId(courseId);
+    }
+
+    public List<Section> findByYearLevel(Integer yearLevel) {
+        return sectionRepository.findByYearLevel(yearLevel);
+    }
+
     public Optional<Section> findById(Long id) {
         return sectionRepository.findById(id);
     }
 
-    public void save(Section section) {
-        sectionRepository.save(section);
+    public Section save(Section section) {
+        return sectionRepository.save(section);
     }
 
     public void deleteById(Long id) {
         sectionRepository.deleteById(id);
+    }
+
+    public List<Section> searchByName(String name) {
+        return sectionRepository.findByNameContainingIgnoreCase(name);
     }
 }

@@ -6,9 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
   <title>Add User</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <style>
     .sidebar {
       height: 100vh;
@@ -91,19 +89,34 @@
           </select>
         </div>
 
-        <div class="mb-3" id="departmentWrapper" style="display:none;">
-          <label for="department" class="form-label">Department</label>
-          <input th:field="*{department}" type="text" class="form-control" id="department"
-                 placeholder="e.g., Computer Science">
+        <!-- Year Level Dropdown -->
+        <div class="mb-3" id="yearLevelWrapper" style="display:none;">
+          <label for="yearLevel" class="form-label">Year Level</label>
+          <select th:field="*{yearLevel}" class="form-select" id="yearLevel" required>
+            <option value="">-- Select Year Level --</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
         </div>
 
-        <!-- New: Section Dropdown -->
+        <!-- Course Dropdown -->
+        <div class="mb-3" id="courseWrapper" style="display:none;">
+          <label for="course" class="form-label">Course</label>
+          <select th:field="*{course.id}" class="form-select" id="course" required>
+            <option value="">-- Select Course --</option>
+            <option th:each="course : ${courses}"
+                    th:value="${course.id}"
+                    th:text="${course.code + ' - ' + course.name}"></option>
+          </select>
+        </div>
+
+        <!-- Section Dropdown -->
         <div class="mb-3" id="sectionWrapper" style="display: none;">
           <label for="section" class="form-label">Section</label>
-          <select th:field="*{section.id}" class="form-select" id="section">
-            <option th:each="sec : ${sections}"
-                    th:value="${sec.id}"
-                    th:text="${sec.name}">Section Name</option>
+          <select th:field="*{section.id}" class="form-select" id="section" required>
+            <option value="">-- Select Course and Year First --</option>
           </select>
         </div>
 
@@ -132,16 +145,71 @@
       <!-- JavaScript -->
       <script>
         const roleField = document.getElementById('role');
-        const deptField = document.getElementById('departmentWrapper');
+        const yearLevelField = document.getElementById('yearLevelWrapper');
+        const courseField = document.getElementById('courseWrapper');
         const sectionField = document.getElementById('sectionWrapper');
 
         function toggleStudentFields() {
           const isStudent = roleField.value === 'STUDENT';
-          deptField.style.display = isStudent ? 'block' : 'none';
+          yearLevelField.style.display = isStudent ? 'block' : 'none';
+          courseField.style.display = isStudent ? 'block' : 'none';
           sectionField.style.display = isStudent ? 'block' : 'none';
+
+          if (!isStudent) {
+            document.getElementById('yearLevel').value = '';
+            document.getElementById('course').value = '';
+            document.getElementById('section').innerHTML = '<option value="">-- Select Course and Year First --</option>';
+          }
         }
 
+        function loadSections() {
+          const courseSelect = document.getElementById('course');
+          const yearSelect = document.getElementById('yearLevel');
+          const sectionSelect = document.getElementById('section');
+
+          const courseId = courseSelect.value;
+          const yearLevel = yearSelect.value;
+
+          if (!courseId || !yearLevel) {
+            sectionSelect.innerHTML = '<option value="">-- Select Course and Year First --</option>';
+            return;
+          }
+
+          // Get course code (e.g., "BSA" from "BSA - Accountancy")
+          const courseText = courseSelect.options[courseSelect.selectedIndex].text;
+          const courseCode = courseText.split(' - ')[0].trim();
+
+          fetch(`/admin/sections/by-course-and-year?courseId=${courseId}&yearLevel=${yearLevel}`)
+            .then(response => {
+              if (!response.ok) throw new Error('Network response was not ok');
+              return response.json();
+            })
+            .then(sections => {
+              console.log('API Response:', sections);
+              sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
+
+              if (sections && sections.length > 0) {
+                sections.forEach(section => {
+                  const option = document.createElement('option');
+                  option.value = section.id;
+                  option.textContent = `${courseCode}-${yearLevel}${section.name}`;
+                  sectionSelect.appendChild(option);
+                });
+              } else {
+                console.warn('No sections returned from API');
+                sectionSelect.innerHTML = '<option value="">No sections available</option>';
+              }
+            })
+            .catch(error => {
+              console.error('Error loading sections:', error);
+              sectionSelect.innerHTML = '<option value="">Error loading sections</option>';
+            });
+        }
+
+        // Event listeners
         roleField.addEventListener('change', toggleStudentFields);
+        document.getElementById('course').addEventListener('change', loadSections);
+        document.getElementById('yearLevel').addEventListener('change', loadSections);
         document.addEventListener('DOMContentLoaded', toggleStudentFields);
 
         function previewImage(event) {

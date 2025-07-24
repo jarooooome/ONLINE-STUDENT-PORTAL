@@ -85,7 +85,9 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Department</th>
+                        <th>Course</th>
+                        <th>Year Level</th>
+                        <th>Section</th>
                         <th>Enrollment Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -96,7 +98,9 @@
                         <td th:text="${student.id}">1</td>
                         <td th:text="${student.firstName + ' ' + student.lastName}">Juan Dela Cruz</td>
                         <td th:text="${student.email}">juan@example.com</td>
-                        <td th:text="${student.department}">IT</td>
+                        <td th:text="${student.course?.name} ?: 'Not assigned'">BSA</td>
+                        <td th:text="${student.yearLevel} ?: 'Not assigned'">1</td>
+                        <td th:text="${student.section?.name} ?: 'Not assigned'">A</td>
                         <td th:text="${#temporals.format(student.enrollmentDate, 'yyyy-MM-dd')}">2025-06-01</td>
                         <td th:text="${student.active ? 'Active' : 'Inactive'}">Active</td>
                         <td>
@@ -108,7 +112,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="7" class="text-center text-muted">No student records found.</td>
+                        <td colspan="9" class="text-center text-muted">No student records found.</td>
                     </tr>
                     </tbody>
                 </table>

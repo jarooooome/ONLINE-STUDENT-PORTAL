@@ -1,5 +1,6 @@
 package com.example.studentportal.model;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -7,7 +8,11 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "courses") // Make sure this matches your actual DB table
+@Table(name = "courses")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Course {
 
     @Id
@@ -16,6 +21,9 @@ public class Course {
 
     @Column(nullable = false, unique = true)
     private String code; // e.g. "BSIT"
+
+    @Column(nullable = false)
+    private String name; // e.g. "Information Technology"
 
     @Column(nullable = false)
     private String title; // e.g. "Bachelor of Science in Information Technology"
@@ -28,11 +36,36 @@ public class Course {
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean active = true;
 
-    // One course has many sections (e.g., BSIT-1A, BSIT-1B)
+    // Sections relationship
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("course-sections") // Changed to named reference
     private List<Section> sections;
 
-    // Many users (students) enrolled in many courses
-    @ManyToMany(mappedBy = "courses")
+    // Students relationship
+    @ManyToMany(mappedBy = "enrolledCourses")
+    @JsonIgnore // Typically we ignore this side of many-to-many
     private List<User> students;
+
+    /* ───────────── Helper Methods ───────────── */
+
+    @JsonIgnore // Exclude from JSON serialization
+    public String getFullTitle() {
+        return title + " (" + code + ")";
+    }
+
+    @JsonInclude // Explicitly include in JSON
+    public String getShortInfo() {
+        return code + " - " + name;
+    }
+
+    // Custom toString to avoid circular references in logs
+    @Override
+    public String toString() {
+        return "Course{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", active=" + active +
+                '}';
+    }
 }

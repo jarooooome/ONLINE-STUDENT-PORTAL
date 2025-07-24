@@ -3,6 +3,7 @@ package com.example.studentportal.service;
 import com.example.studentportal.model.Course;
 import com.example.studentportal.repository.CourseRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,13 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    // Get only active courses
+    // Get only active courses (same as findAllActiveCourses)
     public List<Course> getActiveCourses() {
+        return courseRepository.findByActiveTrue();
+    }
+
+    // Alias for getActiveCourses() to match controller usage
+    public List<Course> findAllActiveCourses() {
         return courseRepository.findByActiveTrue();
     }
 
@@ -40,6 +46,7 @@ public class CourseService {
                 .map(course -> {
                     course.setCode(courseDetails.getCode());
                     course.setTitle(courseDetails.getTitle());
+                    course.setName(courseDetails.getName()); // Added name update
                     course.setDescription(courseDetails.getDescription());
                     course.setCreditHours(courseDetails.getCreditHours());
                     return courseRepository.save(course);
