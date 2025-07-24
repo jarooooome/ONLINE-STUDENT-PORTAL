@@ -48,6 +48,11 @@ public class User {
     @Column(name = "year_level")
     private String yearLevel;
 
+    /* ───────────── New: Link to Section ───────────── */
+    @ManyToOne
+    @JoinColumn(name = "section_id")
+    private Section section;
+
     /* ───────────── Many-to-many with Course ───────────── */
     @ManyToMany
     @JoinTable(

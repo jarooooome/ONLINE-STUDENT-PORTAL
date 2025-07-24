@@ -18,13 +18,16 @@ public class AdminController {
     private final UserService userService;
     private final CourseService courseService;
     private final ActivityLogService activityLogService;
+    private final SectionService sectionService; // ✅ Add SectionService
 
     public AdminController(UserService userService,
                            CourseService courseService,
-                           ActivityLogService activityLogService) {
+                           ActivityLogService activityLogService,
+                           SectionService sectionService) { // ✅ Inject it
         this.userService = userService;
         this.courseService = courseService;
         this.activityLogService = activityLogService;
+        this.sectionService = sectionService; // ✅ Assign
     }
 
     /* ───────────────────────── Admin Dashboard ───────────────────────── */
@@ -77,6 +80,8 @@ public class AdminController {
         setNoCacheHeaders(response);
 
         model.addAttribute("user", new User());
+        model.addAttribute("sections", sectionService.findAllActiveSections());
+        // ✅ Send sections to view
         return "admin/adduser";
     }
 

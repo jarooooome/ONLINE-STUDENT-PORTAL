@@ -8,5 +8,10 @@ import java.util.List;
 
 @Repository
 public interface SectionRepository extends JpaRepository<Section, Long> {
-    List<Section> findByCourseId(Long courseId); // ✅ Optional helper if you want to filter by course
+
+    // ✅ Returns only active sections (used in dropdowns like adduser.html)
+    List<Section> findByActiveTrue();
+
+    // ✅ Optional: get sections by course if needed
+    List<Section> findByCourseId(Long courseId);
 }

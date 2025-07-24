@@ -12,9 +12,9 @@ import java.util.Optional;
 /**
  * Central service for all user‑related CRUD operations.
  * <p>
- * <b>NOTE</b>: the application now keeps <em>one</em> table – <b>users</b> – that
+ * <b>NOTE</b>: the application now keeps <em>one</em> table – <b>users</b> – that
  * contains every column needed for both admins and students
- * ( studentId, department, enrollmentDate, active …).
+ * ( studentId, department, enrollmentDate, active …).
  */
 @Service
 public class UserService {
