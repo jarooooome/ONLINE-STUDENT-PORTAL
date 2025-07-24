@@ -4,6 +4,7 @@ import com.example.studentportal.model.User;
 import com.example.studentportal.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,7 @@ public class UserService {
     }
 
     /* ─────────────────────────── CREATE ─────────────────────────── */
+    @Transactional
     public User saveUser(User user) {
         if (userRepo.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists: " + user.getEmail());
@@ -51,39 +53,53 @@ public class UserService {
     }
 
     /* ─────────────────────────── READ ─────────────────────────── */
+    @Transactional(readOnly = true)
+    public List<User> findAllUsersWithSections() {
+        return userRepo.findAllWithSections();
+    }
+
+    @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
         return userRepo.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
         return userRepo.findByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public List<User> findByRole(String role) {
         return userRepo.findAllByRole(role);
     }
 
+    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return userRepo.findAll();
     }
 
+    @Transactional(readOnly = true)
     public long countUsers() {
         return userRepo.count();
     }
 
+    @Transactional(readOnly = true)
     public long countByRole(String role) {
         return userRepo.countByRole(role);
     }
 
+    @Transactional(readOnly = true)
     public long countStudentsByActiveStatus(boolean isActive) {
         return userRepo.countByRoleAndActive("STUDENT", isActive);
     }
 
     /* ─────────────────────────── UPDATE / DELETE ─────────────────────────── */
+    @Transactional
     public User updateUser(User user) {
         return userRepo.save(user);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         userRepo.deleteById(id);
     }
