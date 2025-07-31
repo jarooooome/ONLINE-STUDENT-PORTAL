@@ -88,8 +88,6 @@
             <a href="/student/calendar" class="nav-link">
                 <i class="fas fa-calendar-day me-2"></i>Academic Calendar
             </a>
-
-            <!-- Logout Button -->
             <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
                 <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
             </form>
@@ -105,39 +103,39 @@
                     <form th:action="@{/student/profile/update}" th:object="${student}" method="post">
                         <div class="row mb-3">
                             <div class="col">
-                                <label for="firstName" class="form-label">First Name</label>
-                                <input type="text" id="firstName" class="form-control" th:field="*{firstName}">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" th:field="*{firstName}">
                             </div>
                             <div class="col">
-                                <label for="lastName" class="form-label">Last Name</label>
-                                <input type="text" id="lastName" class="form-control" th:field="*{lastName}">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" th:field="*{lastName}">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" id="email" class="form-control" th:field="*{email}" readonly>
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" th:field="*{email}" readonly>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col">
-                                <label for="studentId" class="form-label">Student ID</label>
-                                <input type="text" id="studentId" class="form-control" th:value="${student.studentId}" readonly>
+                                <label class="form-label">Student ID</label>
+                                <input type="text" class="form-control" th:value="${student.studentId}" readonly>
                             </div>
                             <div class="col">
-                                <label for="course" class="form-label">Enrolled Course</label>
-                                <input type="text" id="course" class="form-control" th:value="${student.course.title}" readonly>
+                                <label class="form-label">Enrolled Course</label>
+                                <input type="text" class="form-control" th:value="${student.course.title}" readonly>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col">
-                                <label for="yearLevel" class="form-label">Year Level</label>
-                                <input type="text" id="yearLevel" class="form-control" th:value="${student.yearLevel}" readonly>
+                                <label class="form-label">Year Level</label>
+                                <input type="text" class="form-control" th:value="${student.yearLevel}" readonly>
                             </div>
                             <div class="col">
-                                <label for="contactNumber" class="form-label">Contact Number</label>
-                                <input type="text" id="contactNumber" class="form-control" th:field="*{contactNumber}">
+                                <label class="form-label">Contact Number</label>
+                                <input type="text" class="form-control" th:field="*{contactNumber}">
                             </div>
                         </div>
 
@@ -148,26 +146,37 @@
                 </div>
             </div>
 
-            <!-- Password Change -->
+            <!-- Password Change with OTP -->
             <div class="card">
                 <div class="card-header bg-dark text-white">
                     <h5 class="mb-0">Change Password</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Show success or error -->
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <div th:if="${message}" class="alert alert-info" th:text="${message}"></div>
+
+                    <!-- Request OTP -->
+                    <form th:action="@{/student/profile/request-otp}" method="post" class="mb-3">
+                        <button type="submit" class="btn btn-secondary">Request Verification Code</button>
+                    </form>
+
+                    <!-- Password Change Form -->
                     <form th:action="@{/student/profile/change-password}" method="post">
                         <div class="mb-3">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-                            <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                            <label class="form-label">OTP Code</label>
+                            <input type="text" class="form-control" name="otp" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <input type="password" id="newPassword" name="newPassword" class="form-control" required>
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" name="newPassword" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" name="confirmPassword" required>
                         </div>
 
                         <div class="text-end">

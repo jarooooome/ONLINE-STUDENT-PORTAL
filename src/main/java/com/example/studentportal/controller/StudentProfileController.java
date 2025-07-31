@@ -1,7 +1,9 @@
 package com.example.studentportal.controller;
 
 import com.example.studentportal.model.User;
+import com.example.studentportal.service.EmailService;
 import com.example.studentportal.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Random;
 
 @Controller
 @RequestMapping("/student/profile")
@@ -19,6 +23,9 @@ public class StudentProfileController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     // Show profile page
     @GetMapping
@@ -35,43 +42,69 @@ public class StudentProfileController {
                                 Model model) {
         User currentStudent = userService.findByEmail(userDetails.getUsername()).get();
 
-        // Only allow editable fields
         currentStudent.setFirstName(updatedStudent.getFirstName());
         currentStudent.setLastName(updatedStudent.getLastName());
         currentStudent.setContactNumber(updatedStudent.getContactNumber());
 
-        userService.save(currentStudent); // save updated info
+        userService.updateUser(currentStudent);
         model.addAttribute("student", currentStudent);
         model.addAttribute("success", "Profile updated successfully.");
         return "student/profile";
     }
 
-    // Change password
+    // Step 1: Request OTP
+    @PostMapping("/request-otp")
+    public String requestOtp(HttpSession session,
+                             @AuthenticationPrincipal UserDetails userDetails,
+                             Model model) {
+
+        User student = userService.findByEmail(userDetails.getUsername()).get();
+        model.addAttribute("student", student);
+
+        int otp = new Random().nextInt(900000) + 100000;
+        session.setAttribute("otp", otp);
+        session.setAttribute("otpEmail", student.getEmail());
+
+        emailService.sendOtp(student.getEmail(), String.valueOf(otp));
+        model.addAttribute("otpRequested", true);
+        model.addAttribute("message", "A verification code has been sent to your email.");
+
+        return "student/profile";
+    }
+
+    // Step 2: Change password with OTP
     @PostMapping("/change-password")
-    public String changePassword(@RequestParam("currentPassword") String currentPassword,
+    public String changePassword(@RequestParam("otp") String enteredOtp,
                                  @RequestParam("newPassword") String newPassword,
                                  @RequestParam("confirmPassword") String confirmPassword,
                                  @AuthenticationPrincipal UserDetails userDetails,
+                                 HttpSession session,
                                  Model model) {
 
         User student = userService.findByEmail(userDetails.getUsername()).get();
         model.addAttribute("student", student);
 
-        // Validate current password
-        if (!passwordEncoder.matches(currentPassword, student.getPassword())) {
-            model.addAttribute("error", "Current password is incorrect.");
+        Object sessionOtp = session.getAttribute("otp");
+        Object otpEmail = session.getAttribute("otpEmail");
+
+        if (sessionOtp == null || otpEmail == null ||
+                !otpEmail.equals(student.getEmail()) ||
+                !enteredOtp.equals(sessionOtp.toString())) {
+            model.addAttribute("error", "Invalid or expired OTP.");
             return "student/profile";
         }
 
-        // Validate new password match
         if (!newPassword.equals(confirmPassword)) {
-            model.addAttribute("error", "New password and confirm password do not match.");
+            model.addAttribute("error", "Passwords do not match.");
             return "student/profile";
         }
 
-        // Save new password
         student.setPassword(passwordEncoder.encode(newPassword));
-        userService.save(student);
+        userService.updateUser(student);
+
+        session.removeAttribute("otp");
+        session.removeAttribute("otpEmail");
+
         model.addAttribute("success", "Password changed successfully.");
         return "student/profile";
     }
