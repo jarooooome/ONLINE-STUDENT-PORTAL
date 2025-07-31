@@ -160,7 +160,7 @@
                             <tbody>
                             <tr th:each="schedule : ${schedules}" th:with="timeDisplay=${schedule.startTime + ' - ' + schedule.endTime}">
                                 <td th:text="${schedule.subject?.name} ?: 'N/A'">Math 101</td>
-                                <td th:text="${schedule.section} ?: 'N/A'">BSIT-1A</td>
+                                <td th:text="${schedule.section.course.code + '-' + schedule.section.yearLevel + schedule.section.name}">BSIT-1A</td>
                                 <td th:text="${schedule.instructor} ?: 'Not assigned'">Prof. Santos</td>
                                 <td th:text="${schedule.day} ?: 'N/A'">Monday</td>
                                 <td th:text="${timeDisplay} ?: 'Not scheduled'">8:00 AM - 10:00 AM</td>

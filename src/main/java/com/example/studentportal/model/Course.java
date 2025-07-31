@@ -38,27 +38,31 @@ public class Course {
 
     // Sections relationship
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("course-sections") // Changed to named reference
+    @JsonManagedReference("course-sections")
     private List<Section> sections;
 
     // Students relationship
     @ManyToMany(mappedBy = "enrolledCourses")
-    @JsonIgnore // Typically we ignore this side of many-to-many
+    @JsonIgnore
     private List<User> students;
 
     /* ───────────── Helper Methods ───────────── */
 
-    @JsonIgnore // Exclude from JSON serialization
+    @JsonIgnore
     public String getFullTitle() {
         return title + " (" + code + ")";
     }
 
-    @JsonInclude // Explicitly include in JSON
+    @JsonInclude
     public String getShortInfo() {
         return code + " - " + name;
     }
 
-    // Custom toString to avoid circular references in logs
+    // ✅ Abbreviation used in Thymeleaf (just exposes code)
+    public String getAbbreviation() {
+        return code;
+    }
+
     @Override
     public String toString() {
         return "Course{" +

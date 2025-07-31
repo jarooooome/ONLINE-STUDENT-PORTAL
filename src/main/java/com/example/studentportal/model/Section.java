@@ -27,7 +27,7 @@ public class Section {
     @Column(columnDefinition = "boolean default true")
     private boolean active = true;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) // changed to EAGER to avoid lazy-loading errors in Thymeleaf
     @JoinColumn(name = "course_id", nullable = false)
     @JsonBackReference // Breaks the infinite loop
     private Course course;

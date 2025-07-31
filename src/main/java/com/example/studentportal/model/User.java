@@ -36,7 +36,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Never show in JSON responses
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(nullable = false)
@@ -51,7 +51,7 @@ public class User {
     private LocalDate enrollmentDate;
 
     @Column(name = "year_level")
-    private String yearLevel;  // 1, 2, 3, or 4
+    private String yearLevel;
 
     /* ───────────── Course Relationship ───────────── */
     @ManyToOne(fetch = FetchType.LAZY)

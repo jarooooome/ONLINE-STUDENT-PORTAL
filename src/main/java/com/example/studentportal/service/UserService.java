@@ -103,4 +103,10 @@ public class UserService {
     public void deleteById(Long id) {
         userRepo.deleteById(id);
     }
+
+    // ✅ Added generic save method for update profile/password use
+    @Transactional
+    public User save(User user) {
+        return userRepo.save(user);
+    }
 }

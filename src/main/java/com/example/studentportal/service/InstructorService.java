@@ -1,14 +1,29 @@
 package com.example.studentportal.service;
 
 import com.example.studentportal.model.Instructor;
+import com.example.studentportal.repository.InstructorRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface InstructorService {
-    List<Instructor> getAllInstructors();
-    Optional<Instructor> getInstructorById(Long id);
-    Instructor saveInstructor(Instructor instructor);
-    Instructor updateInstructor(Long id, Instructor instructor);
-    void deleteInstructor(Long id);
+@Service
+public class InstructorService {
+
+    private final InstructorRepository instructorRepository;
+
+    public InstructorService(InstructorRepository instructorRepository) {
+        this.instructorRepository = instructorRepository;
+    }
+
+    public List<Instructor> getAllInstructors() {
+        return instructorRepository.findAll();
+    }
+
+    public Instructor getInstructorById(Long id) {
+        return instructorRepository.findById(id).orElse(null);
+    }
+
+    public void saveInstructor(Instructor instructor) {
+        instructorRepository.save(instructor);
+    }
 }

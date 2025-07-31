@@ -13,40 +13,40 @@
 
     <style>
         body {
-          overflow-x: hidden;
+            overflow-x: hidden;
         }
 
         .sidebar {
-          min-height: 100vh;
-          background-color: #343a40;
-          padding-top: 1rem;
+            min-height: 100vh;
+            background-color: #343a40;
+            padding-top: 1rem;
         }
 
         .sidebar a, .logout-form button {
-          color: white;
-          padding: 0.75rem 1.25rem;
-          text-decoration: none;
-          display: block;
-          border: none;
-          background: none;
-          text-align: left;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            text-decoration: none;
+            display: block;
+            border: none;
+            background: none;
+            text-align: left;
         }
 
         .sidebar a:hover, .logout-form button:hover {
-          background-color: #495057;
+            background-color: #495057;
         }
 
         .sidebar a.active {
-          background-color: #495057;
-          font-weight: bold;
+            background-color: #495057;
+            font-weight: bold;
         }
 
         .logout-form {
-          margin-top: auto;
+            margin-top: auto;
         }
 
         .table th, .table td {
-          vertical-align: middle;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -98,10 +98,10 @@
                         <td th:text="${student.id}">1</td>
                         <td th:text="${student.firstName + ' ' + student.lastName}">Juan Dela Cruz</td>
                         <td th:text="${student.email}">juan@example.com</td>
-                        <td th:text="${student.course?.name} ?: 'Not assigned'">BSA</td>
-                        <td th:text="${student.yearLevel} ?: 'Not assigned'">1</td>
-                        <td th:text="${student.section?.name} ?: 'Not assigned'">A</td>
-                        <td th:text="${#temporals.format(student.enrollmentDate, 'yyyy-MM-dd')}">2025-06-01</td>
+                        <td th:text="${student.course != null ? student.course.name : 'Not assigned'}">BSA</td>
+                        <td th:text="${student.yearLevel != null ? student.yearLevel : 'Not assigned'}">1</td>
+                        <td th:text="${student.section != null ? student.section.course.code + '-' + student.section.yearLevel + student.section.name : 'Not assigned'}"></td>
+                        <td th:text="${student.enrollmentDate != null ? #temporals.format(student.enrollmentDate, 'yyyy-MM-dd') : 'Not enrolled'}">2025-06-01</td>
                         <td th:text="${student.active ? 'Active' : 'Inactive'}">Active</td>
                         <td>
                             <a th:href="@{'/admin/students/edit/' + ${student.id}}" class="btn btn-sm btn-warning me-2">Edit</a>

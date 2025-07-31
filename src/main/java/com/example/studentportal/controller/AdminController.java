@@ -4,6 +4,7 @@ import com.example.studentportal.model.User;
 import com.example.studentportal.model.Section;
 import com.example.studentportal.service.*;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -82,7 +83,6 @@ public class AdminController {
     /* ───────────────────── Handle Add User Submission ───────────────────── */
     @PostMapping("/users/save")
     public String saveUser(@ModelAttribute("user") User user,
-                           @RequestParam(required = false) Long sectionId,
                            Principal principal,
                            HttpServletResponse response,
                            RedirectAttributes redirectAttributes) throws IOException {
@@ -93,9 +93,11 @@ public class AdminController {
         setNoCacheHeaders(response);
 
         try {
-            // Handle section assignment for students
-            if (user.getRole().equals("STUDENT") && sectionId != null) {
-                Section section = sectionService.findById(sectionId)
+            // Fix: Bind section properly using section.id from form
+            if ("STUDENT".equalsIgnoreCase(user.getRole())
+                    && user.getSection() != null
+                    && user.getSection().getId() != null) {
+                Section section = sectionService.findById(user.getSection().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Invalid section ID"));
                 user.setSection(section);
             }
@@ -113,10 +115,16 @@ public class AdminController {
     /* ───────────────────── Get Sections by Course and Year ───────────────────── */
     @GetMapping("/sections/by-course-and-year")
     @ResponseBody
-    public List<Section> getSectionsByCourseAndYear(
+    public ResponseEntity<?> getSectionsByCourseAndYear(
             @RequestParam Long courseId,
             @RequestParam Integer yearLevel) {
-        return sectionService.findByCourseIdAndYearLevel(courseId, yearLevel);
+
+        if (courseId == null || yearLevel == null) {
+            return ResponseEntity.badRequest().body("courseId and yearLevel are required");
+        }
+
+        List<Section> sections = sectionService.findByCourseIdAndYearLevel(courseId, yearLevel);
+        return ResponseEntity.ok(sections);
     }
 
     /* ───────────────────────── Utility Method ───────────────────────── */

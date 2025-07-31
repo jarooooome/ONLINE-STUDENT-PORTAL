@@ -18,7 +18,7 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
     @Query("SELECT s FROM Section s WHERE s.course.id = :courseId")
     List<Section> findByCourseId(@Param("courseId") Long courseId);
 
-    // Returns sections filtered by both course ID and year level (fixed)
+    // Returns sections filtered by both course ID and year level
     @Query("SELECT s FROM Section s WHERE s.course.id = :courseId AND s.yearLevel = :yearLevel")
     List<Section> findByCourseIdAndYearLevel(
             @Param("courseId") Long courseId,

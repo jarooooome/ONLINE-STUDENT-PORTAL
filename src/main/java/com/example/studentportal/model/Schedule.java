@@ -1,5 +1,6 @@
 package com.example.studentportal.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,8 +14,9 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)  // Ensure this matches your DB column
-    private String section;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id", nullable = false)
+    private Section section;
 
     @Column(nullable = false)
     private String instructor;
@@ -33,9 +35,9 @@ public class Schedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
+    @JsonIgnore
     private Subject subject;
 
-    // Transient field for display purposes only
     @Transient
     public String getTime() {
         return (this.startTime != null && this.endTime != null)
