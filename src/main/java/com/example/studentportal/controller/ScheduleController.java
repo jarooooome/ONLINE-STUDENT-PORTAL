@@ -108,4 +108,16 @@ public class ScheduleController {
         model.addAttribute("schedules", schedules);
         return "admin/schedules";
     }
+
+    // ✅ New method for deleting schedule
+    @GetMapping("/delete/{id}")
+    public String deleteSchedule(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            scheduleService.deleteSchedule(id);
+            redirectAttributes.addFlashAttribute("success", "Schedule deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete schedule: " + e.getMessage());
+        }
+        return "redirect:/admin/subjects";
+    }
 }
