@@ -13,6 +13,7 @@ import java.util.Optional;
  * <p>
  * <ul>
  *   <li>{@code findByEmail} – look‑up during login / duplicate‑check</li>
+ *   <li>{@code findByStudentId} – alternative login using student ID</li>
  *   <li>{@code countByRole} – dashboard metrics (e.g. number of STUDENTs)</li>
  *   <li>{@code countByRoleAndActive} – count only active/inactive users of a specific role</li>
  *   <li>{@code findAllByRole} – list all users of a given role</li>
@@ -25,6 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /* ───────────── Look‑ups ───────────── */
 
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByStudentId(String studentId);
 
     /* ───────────── Aggregates ─────────── */
 
