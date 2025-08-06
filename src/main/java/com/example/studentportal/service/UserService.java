@@ -35,11 +35,14 @@ public class UserService {
         user.setPassword(encoder.encode(user.getPassword()));
 
         if ("STUDENT".equalsIgnoreCase(user.getRole())) {
-            user.setStudentId("STU" + System.currentTimeMillis());
+            // Only generate student ID if it's not manually provided
+            if (user.getStudentId() == null || user.getStudentId().trim().isEmpty()) {
+                user.setStudentId("STU" + System.currentTimeMillis());
+            }
+
             user.setEnrollmentDate(LocalDate.now());
             user.setActive(true);
 
-            // Validate course is selected for students
             if (user.getCourse() == null) {
                 throw new IllegalArgumentException("Course is required for students");
             }
@@ -104,7 +107,6 @@ public class UserService {
         userRepo.deleteById(id);
     }
 
-    // ✅ Added generic save method for update profile/password use
     @Transactional
     public User save(User user) {
         return userRepo.save(user);

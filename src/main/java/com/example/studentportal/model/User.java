@@ -44,7 +44,7 @@ public class User {
 
     private boolean active = true;
     private String contactNumber;
-    private String profilePhoto;
+
 
     /* ─────── Student-specific columns ─────── */
     private String studentId;
