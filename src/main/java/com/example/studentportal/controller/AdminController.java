@@ -120,14 +120,21 @@ public class AdminController {
             // Generate QR content and file using raw password
             String qrContent = "Email: " + user.getEmail() + "\nPassword: " + rawPassword;
             String fileName = "qr_" + user.getEmail().replaceAll("[^a-zA-Z0-9]", "_") + ".png";
-            String uploadDir = "src/main/resources/static/qr/";
-            File directory = new File(uploadDir);
-            if (!directory.exists()) directory.mkdirs();
 
-            File qrFile = new File(uploadDir + fileName);
-            generateQRCode(qrContent, 250, 250, qrFile.getAbsolutePath());
+            // Save to both development and runtime locations
+            String[] paths = {
+                    "src/main/resources/static/qr/" + fileName,
+                    "target/classes/static/qr/" + fileName
+            };
 
-            model.addAttribute("qrCodePath", "/qr/" + fileName);
+            for (String path : paths) {
+                File directory = new File(path).getParentFile();
+                if (!directory.exists()) directory.mkdirs();
+                generateQRCode(qrContent, 250, 250, path);
+            }
+
+            // Add cache-busting parameter
+            model.addAttribute("qrCodePath", "/qr/" + fileName + "?v=" + System.currentTimeMillis());
             model.addAttribute("userEmail", user.getEmail());
             model.addAttribute("userPassword", rawPassword);
 
