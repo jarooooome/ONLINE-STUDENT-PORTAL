@@ -16,19 +16,32 @@ public class SectionService {
         this.sectionRepository = sectionRepository;
     }
 
+    public List<Section> findAll() {
+        return sectionRepository.findAll();
+    }
+
     public List<Section> findAllActiveSections() {
         return sectionRepository.findByActiveTrue();
     }
 
     public List<Section> findByCourseIdAndYearLevel(Long courseId, Integer yearLevel) {
+        if (courseId == null && yearLevel == null) {
+            return findAll();
+        }
+        if (courseId == null) {
+            return findByYearLevel(yearLevel);
+        }
+        if (yearLevel == null) {
+            return findByCourseId(courseId);
+        }
         return sectionRepository.findByCourseIdAndYearLevel(courseId, yearLevel);
     }
 
-    // Additional method if you need String input from controllers
     public List<Section> findByCourseIdAndYearLevelString(Long courseId, String yearLevelString) {
         try {
-            Integer yearLevel = Integer.parseInt(yearLevelString);
-            return sectionRepository.findByCourseIdAndYearLevel(courseId, yearLevel);
+            Integer yearLevel = yearLevelString != null && !yearLevelString.isEmpty() ?
+                    Integer.parseInt(yearLevelString) : null;
+            return findByCourseIdAndYearLevel(courseId, yearLevel);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Year level must be a valid number");
         }
@@ -40,6 +53,16 @@ public class SectionService {
 
     public List<Section> findByYearLevel(Integer yearLevel) {
         return sectionRepository.findByYearLevel(yearLevel);
+    }
+
+    public List<Section> findByYearLevel(String yearLevelString) {
+        try {
+            Integer yearLevel = yearLevelString != null && !yearLevelString.isEmpty() ?
+                    Integer.parseInt(yearLevelString) : null;
+            return yearLevel != null ? findByYearLevel(yearLevel) : findAll();
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Year level must be a valid number");
+        }
     }
 
     public Optional<Section> findById(Long id) {

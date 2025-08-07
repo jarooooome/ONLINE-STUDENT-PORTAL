@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -110,5 +111,15 @@ public class UserService {
     @Transactional
     public User save(User user) {
         return userRepo.save(user);
+    }
+
+    /* ─────────────── FILTER FOR STUDENTS BY COURSE / YEAR / SECTION ─────────────── */
+    @Transactional(readOnly = true)
+    public List<User> filterStudents(Long courseId, Integer yearLevel, Long sectionId) {
+        return userRepo.findAllByRole("STUDENT").stream()
+                .filter(user -> courseId == null || (user.getCourse() != null && user.getCourse().getId().equals(courseId)))
+                .filter(user -> yearLevel == null || (user.getYearLevel() != null && user.getYearLevel().equals(yearLevel)))
+                .filter(user -> sectionId == null || (user.getSection() != null && user.getSection().getId().equals(sectionId)))
+                .collect(Collectors.toList());
     }
 }

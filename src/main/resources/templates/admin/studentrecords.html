@@ -78,6 +78,44 @@
         <main class="col-md-10 p-4">
             <h2 class="mb-4">Student Records</h2>
 
+            <!-- Filter Form -->
+            <form th:action="@{/admin/students}" method="get" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label for="courseFilter" class="form-label">Course</label>
+                    <select id="courseFilter" name="courseId" class="form-select">
+                        <option value="">All</option>
+                        <option th:each="course : ${courses}"
+                                th:value="${course.id}"
+                                th:text="${course.name}"
+                                th:selected="${param.courseId != null and param.courseId == course.id.toString()}">Course Name</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="yearLevelFilter" class="form-label">Year Level</label>
+                    <select id="yearLevelFilter" name="yearLevel" class="form-select">
+                        <option value="">All</option>
+                        <option th:each="level : ${#numbers.sequence(1, 4)}"
+                                th:value="${level}"
+                                th:text="'Year ' + ${level}"
+                                th:selected="${param.yearLevel != null and param.yearLevel.toString() == level.toString()}">1</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sectionFilter" class="form-label">Section</label>
+                    <select id="sectionFilter" name="sectionId" class="form-select">
+                        <option value="">All</option>
+                        <option th:each="section : ${sections}"
+                                th:value="${section.id}"
+                                th:text="${section.course.code + '-' + section.yearLevel + section.name}"
+                                th:selected="${param.sectionId != null and param.sectionId == section.id.toString()}">Section</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Filter</button>
+                </div>
+            </form>
+
+            <!-- Student Table -->
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead class="table-light">
@@ -99,7 +137,7 @@
                         <td th:text="${student.firstName + ' ' + student.lastName}">Juan Dela Cruz</td>
                         <td th:text="${student.email}">juan@example.com</td>
                         <td th:text="${student.course != null ? student.course.name : 'Not assigned'}">BSA</td>
-                        <td th:text="${student.yearLevel != null ? student.yearLevel : 'Not assigned'}">1</td>
+                        <td th:text="${student.yearLevel != null ? 'Year ' + student.yearLevel : 'Not assigned'}">1</td>
                         <td th:text="${student.section != null ? student.section.course.code + '-' + student.section.yearLevel + student.section.name : 'Not assigned'}"></td>
                         <td th:text="${student.enrollmentDate != null ? #temporals.format(student.enrollmentDate, 'yyyy-MM-dd') : 'Not enrolled'}">2025-06-01</td>
                         <td th:text="${student.active ? 'Active' : 'Inactive'}">Active</td>

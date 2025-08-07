@@ -99,13 +99,12 @@
           <label for="yearLevel" class="form-label">Year Level</label>
           <select th:field="*{yearLevel}" class="form-select" id="yearLevel" required>
             <option value="">-- Select Year Level --</option>
-            <option value="1">1st Year</option>
-            <option value="2">2nd Year</option>
-            <option value="3">3rd Year</option>
-            <option value="4">4th Year</option>
+            <option th:value="1">1st Year</option>
+            <option th:value="2">2nd Year</option>
+            <option th:value="3">3rd Year</option>
+            <option th:value="4">4th Year</option>
           </select>
-        </div>
-
+          
         <!-- Course Dropdown -->
         <div class="mb-3" id="courseWrapper" style="display:none;">
           <label for="course" class="form-label">Course</label>

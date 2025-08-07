@@ -25,6 +25,11 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
+    // Required for filtering in controller
+    public List<Course> findAll() {
+        return getAllCourses();
+    }
+
     // Get only active courses (same as findAllActiveCourses)
     public List<Course> getActiveCourses() {
         return courseRepository.findByActiveTrue();

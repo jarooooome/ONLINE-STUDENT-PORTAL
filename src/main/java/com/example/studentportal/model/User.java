@@ -51,7 +51,7 @@ public class User {
     private LocalDate enrollmentDate;
 
     @Column(name = "year_level")
-    private String yearLevel;
+    private Integer yearLevel;
 
     /* ───────────── Course Relationship ───────────── */
     @ManyToOne(fetch = FetchType.LAZY)

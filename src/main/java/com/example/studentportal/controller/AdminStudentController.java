@@ -3,10 +3,12 @@ package com.example.studentportal.controller;
 import com.example.studentportal.model.User;
 import com.example.studentportal.service.UserService;
 import com.example.studentportal.service.CourseService;
+import com.example.studentportal.service.SectionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/students")
@@ -14,17 +16,28 @@ public class AdminStudentController {
 
     private final UserService userService;
     private final CourseService courseService;
+    private final SectionService sectionService;
 
     public AdminStudentController(UserService userService,
-                                  CourseService courseService) {
+                                  CourseService courseService,
+                                  SectionService sectionService) {
         this.userService = userService;
         this.courseService = courseService;
+        this.sectionService = sectionService;
     }
 
     /* ─────────────── LIST: /admin/students ─────────────── */
     @GetMapping
-    public String listStudents(Model model, Principal principal) {
-        model.addAttribute("students", userService.findByRole("STUDENT"));
+    public String listStudents(@RequestParam(required = false) Long courseId,
+                               @RequestParam(required = false) Integer yearLevel,
+                               @RequestParam(required = false) Long sectionId,
+                               Model model,
+                               Principal principal) {
+
+        List<User> students = userService.filterStudents(courseId, yearLevel, sectionId);
+        model.addAttribute("students", students);
+        model.addAttribute("courses", courseService.findAll());
+        model.addAttribute("sections", sectionService.findAll());
         model.addAttribute("currentAdmin", principal.getName());
         return "admin/studentrecords";
     }
