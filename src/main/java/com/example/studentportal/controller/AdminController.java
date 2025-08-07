@@ -10,9 +10,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.List;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.Writer;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.qrcode.QRCodeWriter;
 
 @Controller
 @RequestMapping("/admin")
@@ -85,7 +94,8 @@ public class AdminController {
     public String saveUser(@ModelAttribute("user") User user,
                            Principal principal,
                            HttpServletResponse response,
-                           RedirectAttributes redirectAttributes) throws IOException {
+                           RedirectAttributes redirectAttributes,
+                           Model model) throws IOException {
         if (principal == null) {
             response.sendRedirect("/auth/login");
             return null;
@@ -102,14 +112,30 @@ public class AdminController {
                 user.setSection(section);
             }
 
+            // Capture raw password before encoding
+            String rawPassword = user.getPassword();
+
             userService.saveUser(user);
-            redirectAttributes.addFlashAttribute("success", "User saved successfully");
+
+            // Generate QR content and file using raw password
+            String qrContent = "Email: " + user.getEmail() + "\nPassword: " + rawPassword;
+            String fileName = "qr_" + user.getEmail().replaceAll("[^a-zA-Z0-9]", "_") + ".png";
+            String uploadDir = "src/main/resources/static/qr/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
+
+            File qrFile = new File(uploadDir + fileName);
+            generateQRCode(qrContent, 250, 250, qrFile.getAbsolutePath());
+
+            model.addAttribute("qrCodePath", "/qr/" + fileName);
+            model.addAttribute("userEmail", user.getEmail());
+            model.addAttribute("userPassword", rawPassword);
+
+            return "admin/userqr";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error saving user: " + e.getMessage());
             return "redirect:/admin/users/add";
         }
-
-        return "redirect:/admin/users";
     }
 
     /* ───────────────────── Get Sections by Course and Year ───────────────────── */
@@ -132,5 +158,12 @@ public class AdminController {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Expires", "0");
+    }
+
+    private void generateQRCode(String text, int width, int height, String filePath) throws Exception {
+        Writer writer = new QRCodeWriter();
+        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height);
+        Path path = Paths.get(filePath);
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
     }
 }
