@@ -203,19 +203,26 @@
             </div>
 
             <div class="row">
-                <!-- Real-Time Notifications -->
+                <!-- Notifications + Announcements -->
                 <div class="col-md-6 mb-4">
                     <div class="card notification-card">
                         <div class="card-header">
-                            <i class="fas fa-bell me-2"></i>Real-Time Notifications
+                            <i class="fas fa-bell me-2"></i>Real-Time Notifications & Announcements
                         </div>
                         <div class="card-body">
-                            <div th:if="${#lists.isEmpty(notifications)}">
+                            <div th:if="${#lists.isEmpty(notifications) and #lists.isEmpty(announcements)}">
                                 <div class="icon-muted"><i class="fas fa-bell-slash"></i></div>
                                 <p>No notifications at the moment.</p>
                             </div>
-                            <ul class="list-group" th:if="${!#lists.isEmpty(notifications)}">
+                            <ul class="list-group">
+                                <!-- Notifications -->
                                 <li class="list-group-item" th:each="notif : ${notifications}" th:text="${notif.message}"></li>
+                                <!-- Announcements -->
+                                <li class="list-group-item" th:each="ann : ${announcements}">
+                                    <strong th:text="${ann.title}"></strong><br>
+                                    <span th:text="${ann.message}"></span><br>
+                                    <small class="text-muted" th:text="${#temporals.format(ann.createdAt, 'MMM dd, yyyy HH:mm')}"></small>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -242,31 +249,22 @@
 <script>
     function updateLocalTime() {
         const now = new Date();
-
         const hoursRaw = now.getHours();
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
         const ampm = hoursRaw >= 12 ? 'PM' : 'AM';
         const hours = hoursRaw % 12 || 12;
-
         const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
-
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-
+        const months = ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'];
         const day = days[now.getDay()];
         const month = months[now.getMonth()];
         const date = now.getDate();
         const year = now.getFullYear();
         const dateString = `${day}, ${month} ${date}, ${year}`;
-
         const fullString = `${dateString} - ${timeString}`;
         document.getElementById("realTimeClock").textContent = fullString;
     }
-
     updateLocalTime();
     setInterval(updateLocalTime, 1000);
 </script>
@@ -275,12 +273,9 @@
 <script>
     const toggle = document.getElementById("darkToggle");
     const body = document.body;
-
-    // Load dark mode state from localStorage
     if (localStorage.getItem("dark-mode") === "enabled") {
         body.classList.add("dark-mode");
     }
-
     toggle.addEventListener("click", () => {
         body.classList.toggle("dark-mode");
         localStorage.setItem("dark-mode", body.classList.contains("dark-mode") ? "enabled" : "disabled");

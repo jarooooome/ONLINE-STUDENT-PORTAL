@@ -31,15 +31,18 @@ public class AdminController {
     private final CourseService courseService;
     private final ActivityLogService activityLogService;
     private final SectionService sectionService;
+    private final AnnouncementService announcementService;  // Added
 
     public AdminController(UserService userService,
                            CourseService courseService,
                            ActivityLogService activityLogService,
-                           SectionService sectionService) {
+                           SectionService sectionService,
+                           AnnouncementService announcementService) {  // Added parameter
         this.userService = userService;
         this.courseService = courseService;
         this.activityLogService = activityLogService;
         this.sectionService = sectionService;
+        this.announcementService = announcementService;  // Initialize
     }
 
     /* ───────────────────────── Admin Dashboard ───────────────────────── */
@@ -57,6 +60,13 @@ public class AdminController {
         model.addAttribute("subjectCount", courseService.countActiveCourses());
         model.addAttribute("pendingActions", activityLogService.countPendingActions());
         model.addAttribute("recentActivities", activityLogService.getRecentActivities());
+
+        // Add Announcement model attribute for form binding
+        model.addAttribute("announcement", new com.example.studentportal.model.Announcement());
+
+        // Optional: add all announcements to model if you want to show existing ones
+        model.addAttribute("announcements", announcementService.getAllAnnouncements());
+
         return "admin/admindashboard";
     }
 

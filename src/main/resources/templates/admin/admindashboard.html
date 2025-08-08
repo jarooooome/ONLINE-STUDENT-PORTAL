@@ -90,6 +90,13 @@
         <main class="col-md-10 p-4">
             <h2 class="mb-4">Admin Dashboard</h2>
 
+            <!-- Success Message Alert -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <!-- Quick Stats -->
             <div class="row mb-4">
                 <div class="col-md-3 mb-3">
@@ -118,36 +125,11 @@
                 </div>
             </div>
 
-            <!-- Recent Activity Table -->
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Activity</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Action</th>
-                                <th>User</th>
-                                <th>Details</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="activity : ${recentActivities}">
-                                <td th:text="${#temporals.format(activity.timestamp, 'MMM dd, yyyy HH:mm')}">2025-07-01</td>
-                                <td th:text="${activity.action}">Created User</td>
-                                <td th:text="${activity.user}">admin@school.edu</td>
-                                <td th:text="${activity.details}">Registered new student account</td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(recentActivities)}">
-                                <td colspan="4" class="text-center text-muted">No recent activities.</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- Replaced Recent Activity with Add Announcement Button -->
+            <div class="card shadow-sm p-4 text-center">
+                <button type="button" class="btn btn-primary btn-lg" onclick="window.location.href='/admin/addannouncement'">
+                    <i class="fas fa-bullhorn me-2"></i> Add Announcement
+                </button>
             </div>
         </main>
     </div>

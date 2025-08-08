@@ -3,6 +3,7 @@ package com.example.studentportal.controller;
 import com.example.studentportal.model.User;
 import com.example.studentportal.service.EmailService;
 import com.example.studentportal.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Random;
 
 @Controller
-@RequestMapping("/student/profile")
+@RequestMapping("/student")
 public class StudentProfileController {
 
     @Autowired
@@ -27,16 +28,26 @@ public class StudentProfileController {
     @Autowired
     private EmailService emailService;
 
-    // Show profile page
-    @GetMapping
-    public String viewProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    /**
+     * Show profile page OR change-password page depending on URL:
+     *  - GET /student/profile            -> returns "student/profile"
+     *  - GET /student/change-password    -> returns "student/change-password"
+     */
+    @GetMapping({"/profile", "/change-password"})
+    public String viewProfile(@AuthenticationPrincipal UserDetails userDetails,
+                              Model model,
+                              HttpServletRequest request) {
         User student = userService.findByEmail(userDetails.getUsername()).get();
         model.addAttribute("student", student);
+
+        String uri = request.getRequestURI();
+        if (uri != null && uri.endsWith("/change-password")) {
+            return "student/change-password";
+        }
         return "student/profile";
     }
 
-    // Update profile info
-    @PostMapping("/update")
+    @PostMapping("/profile/update")
     public String updateProfile(@ModelAttribute("student") User updatedStudent,
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 Model model) {
@@ -52,10 +63,10 @@ public class StudentProfileController {
         return "student/profile";
     }
 
-    // Step 1: Request OTP
-    @PostMapping("/request-otp")
+    @PostMapping({"/profile/request-otp", "/change-password/request-otp"})
     public String requestOtp(HttpSession session,
                              @AuthenticationPrincipal UserDetails userDetails,
+                             HttpServletRequest request,
                              Model model) {
 
         User student = userService.findByEmail(userDetails.getUsername()).get();
@@ -69,16 +80,21 @@ public class StudentProfileController {
         model.addAttribute("otpRequested", true);
         model.addAttribute("message", "A verification code has been sent to your email.");
 
+        // Return correct page depending on where request came from
+        String uri = request.getRequestURI();
+        if (uri != null && uri.contains("/change-password")) {
+            return "student/change-password";
+        }
         return "student/profile";
     }
 
-    // Step 2: Change password with OTP
-    @PostMapping("/change-password")
+    @PostMapping({"/profile/change-password", "/change-password/change-password"})
     public String changePassword(@RequestParam("otp") String enteredOtp,
                                  @RequestParam("newPassword") String newPassword,
                                  @RequestParam("confirmPassword") String confirmPassword,
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  HttpSession session,
+                                 HttpServletRequest request,
                                  Model model) {
 
         User student = userService.findByEmail(userDetails.getUsername()).get();
@@ -91,12 +107,16 @@ public class StudentProfileController {
                 !otpEmail.equals(student.getEmail()) ||
                 !enteredOtp.equals(sessionOtp.toString())) {
             model.addAttribute("error", "Invalid or expired OTP.");
-            return "student/profile";
+            return request.getRequestURI().contains("/change-password")
+                    ? "student/change-password"
+                    : "student/profile";
         }
 
         if (!newPassword.equals(confirmPassword)) {
             model.addAttribute("error", "Passwords do not match.");
-            return "student/profile";
+            return request.getRequestURI().contains("/change-password")
+                    ? "student/change-password"
+                    : "student/profile";
         }
 
         student.setPassword(passwordEncoder.encode(newPassword));
@@ -106,6 +126,8 @@ public class StudentProfileController {
         session.removeAttribute("otpEmail");
 
         model.addAttribute("success", "Password changed successfully.");
-        return "student/profile";
+        return request.getRequestURI().contains("/change-password")
+                ? "student/change-password"
+                : "student/profile";
     }
 }

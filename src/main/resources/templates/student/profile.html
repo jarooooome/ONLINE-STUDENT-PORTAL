@@ -139,6 +139,7 @@
             <a href="/student/calendar" class="nav-link">
                 <i class="fas fa-calendar-day me-2"></i>Academic Calendar
             </a>
+            <!-- Removed Change Password link here -->
             <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
                 <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
             </form>
@@ -197,47 +198,12 @@
                             </div>
                         </div>
 
-                        <div class="text-end">
+                        <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-success">Update Info</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Change Password with OTP -->
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">Change Password</h5>
-                </div>
-                <div class="card-body">
-                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                    <div th:if="${message}" class="alert alert-info" th:text="${message}"></div>
-
-                    <!-- Request OTP -->
-                    <form th:action="@{/student/profile/request-otp}" method="post" class="mb-3">
-                        <button type="submit" class="btn btn-secondary">Request Verification Code</button>
-                    </form>
-
-                    <!-- Change Password Form -->
-                    <form th:action="@{/student/profile/change-password}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">OTP Code</label>
-                            <input type="text" class="form-control" name="otp" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">New Password</label>
-                            <input type="password" class="form-control" name="newPassword" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" name="confirmPassword" required>
-                        </div>
-
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-primary">Change Password</button>
+                            <!-- Change Password button moved here -->
+                            <a href="/student/change-password" class="btn btn-warning">
+                                <i class="fas fa-key me-1"></i> Change Password
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -267,8 +233,7 @@
         const year = now.getFullYear();
         const dateString = `${day}, ${month} ${date}, ${year}`;
 
-        const fullString = `${dateString} - ${timeString}`;
-        document.getElementById("realTimeClock").textContent = fullString;
+        document.getElementById("realTimeClock").textContent = `${dateString} - ${timeString}`;
     }
 
     updateLocalTime();
