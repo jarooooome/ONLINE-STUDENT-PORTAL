@@ -20,25 +20,55 @@ public class AdminAnnouncementController {
         this.announcementService = announcementService;
     }
 
-    // Show the form
+    // Show add form
     @GetMapping("/addannouncement")
     public String showAddAnnouncementForm(Model model) {
         model.addAttribute("announcement", new Announcement());
         return "admin/addannouncement";
     }
 
-    // Process form submission
+    // Process add form submission
     @PostMapping("/addannouncement")
-    public String addAnnouncement(@ModelAttribute Announcement announcement,
+    public String addAnnouncement(@Valid @ModelAttribute Announcement announcement,
                                   BindingResult result,
-                                  Model model,
                                   RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "admin/addannouncement";
         }
-
         announcementService.saveAnnouncement(announcement);
         redirectAttributes.addFlashAttribute("successMessage", "Announcement added successfully!");
+        return "redirect:/admin/dashboard";
+    }
+
+    // Show edit form
+    @GetMapping("/editannouncement/{id}")
+    public String showEditAnnouncementForm(@PathVariable Long id, Model model) {
+        Announcement announcement = announcementService.getAnnouncementById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid announcement Id:" + id));
+        model.addAttribute("announcement", announcement);
+        return "admin/editannouncement";
+    }
+
+    // Process edit form submission
+    @PostMapping("/updateannouncement/{id}")
+    public String updateAnnouncement(@PathVariable Long id,
+                                     @Valid @ModelAttribute Announcement announcement,
+                                     BindingResult result,
+                                     RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/editannouncement";
+        }
+        announcement.setId(id);
+        announcementService.saveAnnouncement(announcement);
+        redirectAttributes.addFlashAttribute("successMessage", "Announcement updated successfully!");
+        return "redirect:/admin/dashboard";
+    }
+
+    // Delete announcement
+    @PostMapping("/deleteannouncement/{id}")
+    public String deleteAnnouncement(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        announcementService.deleteAnnouncement(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Announcement deleted successfully!");
         return "redirect:/admin/dashboard";
     }
 }

@@ -5,6 +5,7 @@ import com.example.studentportal.repository.AnnouncementRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AnnouncementService {
@@ -23,5 +24,11 @@ public class AnnouncementService {
         return announcementRepository.findAll();
     }
 
-    // Add more methods as needed (e.g., find by id, delete)
+    public Optional<Announcement> getAnnouncementById(Long id) {
+        return announcementRepository.findById(id);
+    }
+
+    public void deleteAnnouncement(Long id) {
+        announcementRepository.deleteById(id);
+    }
 }

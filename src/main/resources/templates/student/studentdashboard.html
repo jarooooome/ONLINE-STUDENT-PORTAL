@@ -126,9 +126,7 @@
         }
 
         .card-body {
-            text-align: center;
-            padding: 2rem;
-            font-size: 0.95rem;
+            padding: 1.5rem;
             color: #5a5c69;
         }
 
@@ -154,6 +152,38 @@
 
         .dark-toggle:hover {
             color: var(--primary-dark);
+        }
+
+        /* Announcement styles */
+        .announcement-item {
+            border-left: 3px solid var(--primary);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            background-color: rgba(78, 115, 223, 0.05);
+            border-radius: 0.25rem;
+        }
+
+        body.dark-mode .announcement-item {
+            background-color: rgba(78, 115, 223, 0.15);
+        }
+
+        .announcement-title {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark-mode .announcement-title {
+            color: #a6c1ff;
+        }
+
+        .announcement-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        body.dark-mode .announcement-date {
+            color: #aaa;
         }
     </style>
 </head>
@@ -207,23 +237,21 @@
                 <div class="col-md-6 mb-4">
                     <div class="card notification-card">
                         <div class="card-header">
-                            <i class="fas fa-bell me-2"></i>Real-Time Notifications & Announcements
+                            <i class="fas fa-bullhorn me-2"></i>Latest Announcements
                         </div>
                         <div class="card-body">
-                            <div th:if="${#lists.isEmpty(notifications) and #lists.isEmpty(announcements)}">
-                                <div class="icon-muted"><i class="fas fa-bell-slash"></i></div>
-                                <p>No notifications at the moment.</p>
+                            <div th:if="${#lists.isEmpty(announcements)}">
+                                <div class="icon-muted"><i class="fas fa-bullhorn"></i></div>
+                                <p>No announcements at the moment.</p>
                             </div>
-                            <ul class="list-group">
-                                <!-- Notifications -->
-                                <li class="list-group-item" th:each="notif : ${notifications}" th:text="${notif.message}"></li>
-                                <!-- Announcements -->
-                                <li class="list-group-item" th:each="ann : ${announcements}">
-                                    <strong th:text="${ann.title}"></strong><br>
-                                    <span th:text="${ann.message}"></span><br>
-                                    <small class="text-muted" th:text="${#temporals.format(ann.createdAt, 'MMM dd, yyyy HH:mm')}"></small>
-                                </li>
-                            </ul>
+                            <div th:each="announcement : ${announcements}" class="announcement-item">
+                                <div class="announcement-title" th:text="${announcement.title}">Announcement Title</div>
+                                <div class="announcement-content" th:text="${announcement.content}">Announcement content goes here...</div>
+                                <div class="announcement-date mt-2">
+                                    <i class="far fa-clock me-1"></i>
+                                    <span th:text="${#temporals.format(announcement.createdAt, 'MMM dd, yyyy hh:mm a')}">Jul 11, 2023 10:30 AM</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

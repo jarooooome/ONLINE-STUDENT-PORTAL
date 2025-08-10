@@ -51,7 +51,12 @@ public class SecurityConfig {
                                 "/",
                                 "/index",
                                 "/auth/**",
-                                "/css/**", "/js/**", "/images/**",
+                                "/forgot-password",
+                                "/verify-otp",       // Added this line
+                                "/reset-password",   // Added this line
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
                                 "/error"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
@@ -74,7 +79,7 @@ public class SecurityConfig {
 
                 // Logout configuration
                 .logout(logout -> logout
-                        .logoutUrl("/auth/logout")  // Simple string-based configuration
+                        .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)

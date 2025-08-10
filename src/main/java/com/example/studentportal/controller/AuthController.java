@@ -18,7 +18,10 @@ public class AuthController {
 
     /* ───────────────────── Login Page ───────────────────── */
     @GetMapping("/login")
-    public String login() {
+    public String login(@RequestParam(value = "success", required = false) String success, Model model) {
+        if (success != null) {
+            model.addAttribute("message", "Registration successful! You can now log in.");
+        }
         return "auth/login";
     }
 
