@@ -29,8 +29,10 @@ public class AcademicCalendarController {
     }
 
     @GetMapping("/student/calendar")
-    public String studentCalendarPage() {
-        return "student-calendar";
+    public String studentCalendarPage(Model model) {
+        List<AcademicEvent> events = service.findAll();
+        model.addAttribute("events", events);
+        return "student/student-calendar";
     }
 
     // ---------- REST API for FullCalendar ----------

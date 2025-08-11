@@ -86,6 +86,9 @@
                 <h3 style="color: #000; text-align: center; margin-bottom: 1.5rem; font-weight: 700;">Login</h3>
 
                 <form action="/auth/login" method="post">
+                    <!-- CSRF Token required for Spring Security -->
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                     <!-- Added password reset success alert -->
                     <div th:if="${success}" class="alert alert-success small mb-3">
                         <i class="bi bi-check-circle-fill"></i> <span th:text="${success}">Password reset successfully</span>

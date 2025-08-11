@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SubjectService {
@@ -33,11 +34,19 @@ public class SubjectService {
             existingSubject.setCode(updatedSubject.getCode());
             existingSubject.setName(updatedSubject.getName());
             existingSubject.setDescription(updatedSubject.getDescription());
+            existingSubject.setSemester(updatedSubject.getSemester()); // <-- added this line
             subjectRepository.save(existingSubject);
         }
     }
 
     public void deleteSubject(Long id) {
         subjectRepository.deleteById(id);
+    }
+
+    // Added method to return only active subjects
+    public List<Subject> findAllActiveSubjects() {
+        return subjectRepository.findAll().stream()
+                .filter(Subject::isActive)
+                .collect(Collectors.toList());
     }
 }

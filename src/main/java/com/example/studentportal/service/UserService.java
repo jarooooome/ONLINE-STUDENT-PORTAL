@@ -97,6 +97,12 @@ public class UserService {
         return userRepo.countByRoleAndActive("STUDENT", isActive);
     }
 
+    // <<< ADDED METHOD TO FETCH ALL STUDENTS >>>
+    @Transactional(readOnly = true)
+    public List<User> getAllStudents() {
+        return userRepo.findAllByRole("STUDENT");
+    }
+
     /* ─────────────────────────── UPDATE / DELETE ─────────────────────────── */
     @Transactional
     public User updateUser(User user) {

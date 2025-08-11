@@ -1,0 +1,100 @@
+package com.example.studentportal.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "grades", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"student_id", "subject_id", "semester"})
+})
+public class Grade {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "student_id")
+    private User student;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
+
+    @Column(nullable = false)
+    private String semester;
+
+    @Column(nullable = false)
+    private Double value;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GradeStatus status = GradeStatus.DRAFT;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    // Constructors
+    public Grade() {}
+
+    public Grade(User student, Subject subject, String semester, Double value) {
+        this.student = student;
+        this.subject = subject;
+        this.semester = semester;
+        this.value = value;
+        this.status = GradeStatus.DRAFT;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Getters and setters...
+
+    public Long getId() {
+        return id;
+    }
+    public User getStudent() {
+        return student;
+    }
+    public void setStudent(User student) {
+        this.student = student;
+    }
+    public Subject getSubject() {
+        return subject;
+    }
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
+    public String getSemester() {
+        return semester;
+    }
+    public void setSemester(String semester) {
+        this.semester = semester;
+    }
+    public Double getValue() {
+        return value;
+    }
+    public void setValue(Double value) {
+        this.value = value;
+    }
+    public GradeStatus getStatus() {
+        return status;
+    }
+    public void setStatus(GradeStatus status) {
+        this.status = status;
+    }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}

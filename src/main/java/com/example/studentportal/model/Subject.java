@@ -15,6 +15,10 @@ public class Subject {
     private String name;
     private String description;
 
+    private boolean active = true;  // default to true
+
+    private String semester;  // <-- added this
+
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
@@ -54,6 +58,22 @@ public class Subject {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public String getSemester() {
+        return semester;
+    }
+
+    public void setSemester(String semester) {
+        this.semester = semester;
     }
 
     public Course getCourse() {

@@ -101,11 +101,11 @@ public class SubjectController {
         return "redirect:/admin/subjects";
     }
 
-    // ✅ Required by addschedule.html to load subjects by courseId
+    // Required by addschedule.html to load subjects by courseId
     @GetMapping("/subjects/by-course")
     @ResponseBody
     public List<Subject> getSubjectsByCourse(@RequestParam Long courseId) {
         List<Subject> subjects = subjectRepository.findByCourseId(courseId);
-        return subjects != null ? subjects : List.of(); // ✅ ensure never returning null
+        return subjects != null ? subjects : List.of(); // ensure never returning null
     }
 }
