@@ -11,6 +11,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
+    <!-- jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
         body {
             overflow-x: hidden;
@@ -48,6 +52,10 @@
         .table th, .table td {
             vertical-align: middle;
         }
+
+        .export-btn-group {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +86,13 @@
         <!-- Main Content -->
         <main class="col-md-10 p-4">
             <h2 class="mb-4">Student Records</h2>
+
+            <!-- Export Buttons -->
+            <div class="export-btn-group">
+                <button id="exportPdfBtn" class="btn btn-danger">
+                    <i class="fas fa-file-pdf me-2"></i>Export to PDF
+                </button>
+            </div>
 
             <!-- Filter Form -->
             <form th:action="@{/admin/students}" method="get" class="row g-3 mb-4">
@@ -123,7 +138,7 @@
 
             <!-- Student Table -->
             <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover" id="studentTable">
                     <thead class="table-light">
                     <tr>
                         <th>ID</th>
@@ -170,10 +185,14 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+
     document.addEventListener('DOMContentLoaded', function() {
         const courseFilter = document.getElementById('courseFilter');
         const yearLevelFilter = document.getElementById('yearLevelFilter');
         const sectionFilter = document.getElementById('sectionFilter');
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
 
         // Store all original section options
         const allSectionOptions = Array.from(sectionFilter.querySelectorAll('option[data-course-id]'));
@@ -209,9 +228,78 @@
             }
         }
 
+        // Function to export table data to PDF
+        function exportToPDF() {
+            const doc = new jsPDF();
+
+            // Get filter values for the title
+            const courseName = courseFilter.options[courseFilter.selectedIndex].text;
+            const yearLevel = yearLevelFilter.options[yearLevelFilter.selectedIndex].text;
+            const sectionName = sectionFilter.options[sectionFilter.selectedIndex].text;
+
+            // Create title
+            let title = 'Student Records Report\n';
+            if (courseName !== 'All Courses') title += `Course: ${courseName}\n`;
+            if (yearLevel !== 'All Year Levels') title += `Year Level: ${yearLevel}\n`;
+            if (sectionName !== 'All Sections') title += `Section: ${sectionName}\n`;
+
+            // Add title to PDF
+            doc.setFontSize(16);
+            doc.text(title, 14, 15);
+
+            // Prepare table data
+            const table = document.getElementById('studentTable');
+            const headers = [];
+            const rows = [];
+
+            // Get headers
+            table.querySelectorAll('thead th').forEach(th => {
+                // Skip the Actions column
+                if (th.textContent !== 'Actions') {
+                    headers.push(th.textContent);
+                }
+            });
+
+            // Get rows data
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const row = [];
+                tr.querySelectorAll('td').forEach((td, index) => {
+                    // Skip the Actions column (last column)
+                    if (index < tr.cells.length - 1) {
+                        row.push(td.textContent);
+                    }
+                });
+                rows.push(row);
+            });
+
+            // Add table to PDF
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: 40,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [41, 128, 185],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                margin: { top: 40 }
+            });
+
+            // Save the PDF
+            const fileName = `StudentRecords_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(fileName);
+        }
+
         // Event listeners for course and year level changes
         courseFilter.addEventListener('change', updateSections);
         yearLevelFilter.addEventListener('change', updateSections);
+
+        // Event listener for PDF export
+        exportPdfBtn.addEventListener('click', exportToPDF);
 
         // Initialize sections on page load if course and year level are already selected
         if (courseFilter.value && yearLevelFilter.value) {

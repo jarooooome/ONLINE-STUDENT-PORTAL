@@ -46,6 +46,12 @@
       border-radius: 5px;
       margin-bottom: 20px;
     }
+    .filter-card {
+      margin-bottom: 20px;
+    }
+    .filter-card .card-header {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -81,15 +87,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
-      <!-- Filter Section -->
-      <div class="card shadow-sm mb-4">
+      <!-- Student Filter Section -->
+      <div class="card shadow-sm filter-card">
         <div class="card-header">
-          <h5 class="mb-0">Filters</h5>
+          <h5 class="mb-0">Student Filters</h5>
         </div>
         <div class="card-body">
-          <form th:action="@{/admin/grades}" method="get" id="filterForm">
+          <form th:action="@{/admin/grades}" method="get" id="studentFilterForm">
+            <input type="hidden" name="subjectId" th:value="${param.subjectId}">
+            <input type="hidden" name="semester" th:value="${param.semester}">
             <div class="row">
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label class="form-label">Student</label>
                 <select class="form-select" name="studentId">
                   <option value="">All Students</option>
@@ -100,29 +108,7 @@
                   </option>
                 </select>
               </div>
-              <div class="col-md-3">
-                <label class="form-label">Subject</label>
-                <select class="form-select" name="subjectId">
-                  <option value="">All Subjects</option>
-                  <option th:each="subject : ${subjects}"
-                          th:value="${subject.id}"
-                          th:text="${subject.name}"
-                          th:selected="${param.subjectId != null && param.subjectId == subject.id.toString()}">
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Section</label>
-                <select class="form-select" name="sectionId">
-                  <option value="">All Sections</option>
-                  <option th:each="section : ${sections}"
-                          th:value="${section.id}"
-                          th:text="${section.name}"
-                          th:selected="${param.sectionId != null && param.sectionId == section.id.toString()}">
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label class="form-label">Course</label>
                 <select class="form-select" name="courseId">
                   <option value="">All Courses</option>
@@ -133,13 +119,72 @@
                   </option>
                 </select>
               </div>
+              <div class="col-md-4">
+                <label class="form-label">Section</label>
+                <select class="form-select" name="sectionId">
+                  <option value="">All Sections</option>
+                  <option th:each="section : ${sections}"
+                          th:value="${section.id}"
+                          th:text="${section.name}"
+                          th:selected="${param.sectionId != null && param.sectionId == section.id.toString()}">
+                  </option>
+                </select>
+              </div>
             </div>
             <div class="row mt-3">
               <div class="col-md-12 d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary me-2">
-                  <i class="fas fa-filter me-2"></i>Apply Filters
+                  <i class="fas fa-filter me-2"></i>Apply Student Filters
                 </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()">
+                <button type="button" class="btn btn-outline-secondary" onclick="resetStudentFilters()">
+                  <i class="fas fa-times me-2"></i>Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Grade Filter Section -->
+      <div class="card shadow-sm filter-card">
+        <div class="card-header">
+          <h5 class="mb-0">Grade Filters</h5>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/admin/grades}" method="get" id="gradeFilterForm">
+            <input type="hidden" name="studentId" th:value="${param.studentId}">
+            <input type="hidden" name="courseId" th:value="${param.courseId}">
+            <input type="hidden" name="sectionId" th:value="${param.sectionId}">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label">Subject</label>
+                <select class="form-select" name="subjectId">
+                  <option value="">All Subjects</option>
+                  <option th:each="subject : ${subjects}"
+                          th:value="${subject.id}"
+                          th:text="${subject.name}"
+                          th:selected="${param.subjectId != null && param.subjectId == subject.id.toString()}">
+                  </option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Semester</label>
+                <select class="form-select" name="semester">
+                  <option value="">All Semesters</option>
+                  <option th:each="sem : ${semesters}"
+                          th:value="${sem}"
+                          th:text="${sem}"
+                          th:selected="${param.semester != null && param.semester == sem}">
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="fas fa-filter me-2"></i>Apply Grade Filters
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="resetGradeFilters()">
                   <i class="fas fa-times me-2"></i>Reset
                 </button>
               </div>
@@ -194,7 +239,7 @@
               <h5 class="mb-0" th:if="${selectedStudent == null && param.studentId != null}">Filtered Grades</h5>
             </div>
             <div class="card-body">
-              <div th:if="${selectedStudent != null || param.studentId != null || param.subjectId != null || param.sectionId != null || param.courseId != null}">
+              <div th:if="${selectedStudent != null || param.studentId != null || param.subjectId != null || param.sectionId != null || param.courseId != null || param.semester != null}">
                 <div class="table-responsive">
                   <table class="table table-hover">
                     <thead>
@@ -254,7 +299,7 @@
                   </table>
                 </div>
               </div>
-              <div th:if="${selectedStudent == null && param.studentId == null && param.subjectId == null && param.sectionId == null && param.courseId == null}"
+              <div th:if="${selectedStudent == null && param.studentId == null && param.subjectId == null && param.sectionId == null && param.courseId == null && param.semester == null}"
                    class="text-center no-grades">
                 Please select a student from the list or apply filters to view grades
               </div>
@@ -398,8 +443,19 @@
       window.location.href = '/admin/grades?' + params.toString();
   }
 
-  function resetFilters() {
-      window.location.href = '/admin/grades';
+  function resetStudentFilters() {
+      const params = new URLSearchParams(window.location.search);
+      params.delete('studentId');
+      params.delete('courseId');
+      params.delete('sectionId');
+      window.location.href = '/admin/grades?' + params.toString();
+  }
+
+  function resetGradeFilters() {
+      const params = new URLSearchParams(window.location.search);
+      params.delete('subjectId');
+      params.delete('semester');
+      window.location.href = '/admin/grades?' + params.toString();
   }
 </script>
 </body>
