@@ -2,7 +2,7 @@ services:
   - type: web
     name: student-portal
     runtime: docker
-    env: docker
+    dockerfilePath: Dockerfile
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
