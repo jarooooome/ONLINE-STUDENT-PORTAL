@@ -52,6 +52,13 @@
     .filter-card .card-header {
       font-weight: bold;
     }
+    .grade-checkbox {
+      width: 20px;
+      height: 20px;
+    }
+    .select-all-checkbox {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -223,10 +230,10 @@
                 </button>
                 <div>
                   <button class="btn btn-warning me-2" id="verifyGradesBtn">
-                    <i class="fas fa-check-circle me-2"></i>Verify Grades
+                    <i class="fas fa-check-circle me-2"></i>Verify Selected
                   </button>
                   <button class="btn btn-primary" id="publishGradesBtn">
-                    <i class="fas fa-paper-plane me-2"></i>Publish Grades
+                    <i class="fas fa-paper-plane me-2"></i>Publish Selected
                   </button>
                 </div>
               </div>
@@ -235,10 +242,16 @@
 
           <div class="card shadow-sm">
             <div class="card-header">
-              <h5 class="mb-0" th:if="${selectedStudent != null}"
-                  th:text="'Grades for ' + ${selectedStudent.firstName} + ' ' + ${selectedStudent.lastName}"></h5>
-              <h5 class="mb-0" th:if="${selectedStudent == null && param.studentId == null}">Select a student or apply filters to view grades</h5>
-              <h5 class="mb-0" th:if="${selectedStudent == null && param.studentId != null}">Filtered Grades</h5>
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" th:if="${selectedStudent != null}"
+                    th:text="'Grades for ' + ${selectedStudent.firstName} + ' ' + ${selectedStudent.lastName}"></h5>
+                <h5 class="mb-0" th:if="${selectedStudent == null && param.studentId == null}">Select a student or apply filters to view grades</h5>
+                <h5 class="mb-0" th:if="${selectedStudent == null && param.studentId != null}">Filtered Grades</h5>
+                <div class="form-check">
+                  <input class="form-check-input select-all-checkbox" type="checkbox" id="selectAllGrades">
+                  <label class="form-check-label" for="selectAllGrades">Select All</label>
+                </div>
+              </div>
             </div>
             <div class="card-body">
               <div th:if="${selectedStudent != null || param.studentId != null || param.subjectId != null || param.sectionId != null || param.courseId != null || param.semester != null}">
@@ -246,6 +259,7 @@
                   <table class="table table-hover">
                     <thead>
                     <tr>
+                      <th>Select</th>
                       <th th:if="${selectedStudent == null}">Student</th>
                       <th>Subject</th>
                       <th>Section</th>
@@ -258,6 +272,9 @@
                     </thead>
                     <tbody>
                     <tr th:each="grade : ${grades}">
+                      <td>
+                        <input type="checkbox" class="grade-checkbox" th:value="${grade.id}">
+                      </td>
                       <td th:if="${selectedStudent == null}" th:text="${grade.student.firstName + ' ' + grade.student.lastName}"></td>
                       <td th:text="${grade.subject.name}"></td>
                       <td th:text="${grade.student.section?.name}"></td>
@@ -295,7 +312,7 @@
                       </td>
                     </tr>
                     <tr th:if="${grades.empty}">
-                      <td th:colspan="${selectedStudent == null ? 8 : 7}" class="text-center no-grades">No grades found matching your criteria</td>
+                      <td th:colspan="${selectedStudent == null ? 9 : 8}" class="text-center no-grades">No grades found matching your criteria</td>
                     </tr>
                     </tbody>
                   </table>
@@ -392,15 +409,32 @@
           });
       });
 
-      // Verify grades button
+      // Select all checkbox functionality
+      document.getElementById('selectAllGrades').addEventListener('change', function() {
+          const checkboxes = document.querySelectorAll('.grade-checkbox');
+          checkboxes.forEach(checkbox => {
+              checkbox.checked = this.checked;
+          });
+      });
+
+      // Verify selected grades button
       document.getElementById('verifyGradesBtn').addEventListener('click', function() {
-          const params = new URLSearchParams(window.location.search);
-          if (confirm('Are you sure you want to verify all filtered grades?')) {
-              fetch('/admin/grades/verify?' + params.toString(), {
+          const selectedGrades = getSelectedGrades();
+          if (selectedGrades.length === 0) {
+              alert('Please select at least one grade to verify');
+              return;
+          }
+
+          if (confirm(`Are you sure you want to verify ${selectedGrades.length} selected grade(s)?`)) {
+              fetch('/admin/grades/verify', {
                   method: 'POST',
                   headers: {
+                      'Content-Type': 'application/json',
                       'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-                  }
+                  },
+                  body: JSON.stringify({
+                      gradeIds: selectedGrades
+                  })
               }).then(response => {
                   if (response.ok) location.reload();
                   else alert('Error verifying grades');
@@ -408,21 +442,36 @@
           }
       });
 
-      // Publish grades button
+      // Publish selected grades button
       document.getElementById('publishGradesBtn').addEventListener('click', function() {
-          const params = new URLSearchParams(window.location.search);
-          if (confirm('Are you sure you want to publish all filtered grades?')) {
-              fetch('/admin/grades/publish?' + params.toString(), {
+          const selectedGrades = getSelectedGrades();
+          if (selectedGrades.length === 0) {
+              alert('Please select at least one grade to publish');
+              return;
+          }
+
+          if (confirm(`Are you sure you want to publish ${selectedGrades.length} selected grade(s)?`)) {
+              fetch('/admin/grades/publish', {
                   method: 'POST',
                   headers: {
+                      'Content-Type': 'application/json',
                       'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-                  }
+                  },
+                  body: JSON.stringify({
+                      gradeIds: selectedGrades
+                  })
               }).then(response => {
                   if (response.ok) location.reload();
                   else alert('Error publishing grades');
               });
           }
       });
+
+      // Helper function to get selected grade IDs
+      function getSelectedGrades() {
+          const checkboxes = document.querySelectorAll('.grade-checkbox:checked');
+          return Array.from(checkboxes).map(checkbox => checkbox.value);
+      }
 
       // Automatically set semester based on selected subject
       document.getElementById('subjectSelect').addEventListener('change', function() {

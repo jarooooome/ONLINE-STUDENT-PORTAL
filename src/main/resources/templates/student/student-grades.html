@@ -20,11 +20,7 @@
             --danger: #e74a3b;
             --warning: #f6c23e;
         }
-        body {
-            background-color: var(--light);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
+        body { background-color: var(--light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s; }
         body.dark-mode { background-color: var(--dark-bg); color: var(--dark-text); }
 
         .sidebar { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%); min-height:100vh; color:white; }
@@ -58,6 +54,9 @@
         body.dark-mode .no-grades { color:#aaa; }
         .no-grades-icon { font-size:3rem; color:#e9ecef; margin-bottom:1rem; }
         body.dark-mode .no-grades-icon { color:#555; }
+
+        .semester-btns { margin-bottom: 1rem; }
+        .semester-btns button { margin-right: 0.5rem; }
     </style>
 </head>
 <body>
@@ -80,10 +79,16 @@
         <!-- Main Content -->
         <main class="col-md-10 main-content">
 
-            <!-- Grades Table -->
+            <!-- Grades Table (Only shows subjects with grades) -->
             <div class="grades-card mb-4">
-                <div class="grades-header">
+                <div class="grades-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-chart-bar me-2"></i>My Grades</span>
+                    <!-- Semester Buttons -->
+                    <div class="semester-btns">
+                        <button class="btn btn-sm btn-outline-primary" onclick="showSemester('1st-Sem')">Semester 1</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showSemester('2nd-Sem')">Semester 2</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showSemester('3rd-Sem')">Semester 3</button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div th:if="${#lists.isEmpty(grades)}" class="no-grades">
@@ -92,19 +97,20 @@
                         <p>Your grades will appear here once they're published</p>
                     </div>
                     <div th:unless="${#lists.isEmpty(grades)}" class="table-responsive">
-                        <table class="table grades-table">
+                        <table class="table grades-table" id="gradesTable">
                             <thead>
                             <tr><th>Subject</th><th>Professor</th><th>Grade</th></tr>
                             </thead>
                             <tbody>
-                            <tr th:each="grade : ${grades}">
+                            <tr th:each="grade : ${grades}"
+                                th:class="'semester-' + ${#strings.replace(grade.subject.semester,' ','-')}">
                                 <td th:text="${grade.subject.name}">Subject Name</td>
-                                <td th:text="${#lists.isEmpty(grade.subject.schedules) ? 'TBA' : grade.subject.schedules[0].professor}">Professor Name</td>
+                                <td th:text="${#lists.isEmpty(grade.subject.schedules) ? 'TBA' : grade.subject.schedules[0].professor}">Professor</td>
                                 <td>
                                     <span th:if="${grade.value != null}"
                                           th:class="${grade.value >= 3 && grade.value <= 5} ? 'grade-value grade-fail' : 'grade-value grade-pass'"
-                                          th:text="${grade.value}"></span>
-                                    <span th:if="${grade.value == null}"></span>
+                                          th:text="${grade.value}">
+                                    </span>
                                 </td>
                             </tr>
                             </tbody>
@@ -113,7 +119,7 @@
                 </div>
             </div>
 
-            <!-- Transcript of Records -->
+            <!-- Transcript of Records (Shows all subjects) -->
             <div class="grades-card">
                 <div class="grades-header d-flex justify-content-between align-items-center">
                     <span><i class="fas fa-file-pdf me-2"></i>Transcript of Records</span>
@@ -126,10 +132,14 @@
                             <tr><th>Subject</th><th>Professor</th><th>Grade</th></tr>
                             </thead>
                             <tbody>
-                            <tr th:each="grade : ${grades}">
-                                <td th:text="${grade.subject.name}">Subject Name</td>
-                                <td th:text="${#lists.isEmpty(grade.subject.schedules) ? 'TBA' : grade.subject.schedules[0].professor}">Professor Name</td>
-                                <td th:text="${grade.value != null ? grade.value : ''}"></td>
+                            <tr th:each="subject : ${allSubjects}">
+                                <td th:text="${subject.name}">Subject Name</td>
+                                <td th:text="${#lists.isEmpty(subject.schedules) ? 'TBA' : subject.schedules[0].professor}">Professor</td>
+                                <td>
+                                    <th:block th:each="grade : ${grades}" th:if="${grade.subject.id == subject.id}">
+                                        <span th:if="${grade.value != null}" th:text="${grade.value}"></span>
+                                    </th:block>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
@@ -154,6 +164,18 @@
             jsPDF: { unit:'in', format:'letter', orientation:'portrait' }
         });
     }
+</script>
+
+<!-- Semester Filter Script -->
+<script>
+    function showSemester(sem) {
+        const rows = document.querySelectorAll('#gradesTable tbody tr');
+        rows.forEach(row => {
+            row.style.display = row.classList.contains('semester-' + sem) ? '' : 'none';
+        });
+    }
+    // Show first semester initially
+    showSemester('1st-Sem');
 </script>
 
 <!-- Dark Mode Toggle Script -->

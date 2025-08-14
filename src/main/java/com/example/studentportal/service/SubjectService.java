@@ -1,8 +1,9 @@
 package com.example.studentportal.service;
 
 import com.example.studentportal.model.Subject;
+import com.example.studentportal.model.Course;
 import com.example.studentportal.repository.SubjectRepository;
-import com.example.studentportal.dto.SubjectDTO; // <-- add this import
+import com.example.studentportal.dto.SubjectDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public class SubjectService {
             existingSubject.setCode(updatedSubject.getCode());
             existingSubject.setName(updatedSubject.getName());
             existingSubject.setDescription(updatedSubject.getDescription());
-            existingSubject.setSemester(updatedSubject.getSemester()); // <-- existing line
+            existingSubject.setSemester(updatedSubject.getSemester());
             subjectRepository.save(existingSubject);
         }
     }
@@ -44,14 +45,12 @@ public class SubjectService {
         subjectRepository.deleteById(id);
     }
 
-    // Added method to return only active subjects
     public List<Subject> findAllActiveSubjects() {
         return subjectRepository.findAll().stream()
                 .filter(Subject::isActive)
                 .collect(Collectors.toList());
     }
 
-    // New method: Return subjects by course as DTOs to avoid JSON recursion
     public List<SubjectDTO> findSubjectsByCourseId(Long courseId) {
         List<Subject> subjects = subjectRepository.findByCourseId(courseId);
         if (subjects == null) return List.of();
@@ -64,5 +63,10 @@ public class SubjectService {
                         s.getSemester()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    // NEW METHOD: Get subjects by course (returns full Subject entities)
+    public List<Subject> getSubjectsByCourse(Course course) {
+        return subjectRepository.findByCourse(course);
     }
 }
