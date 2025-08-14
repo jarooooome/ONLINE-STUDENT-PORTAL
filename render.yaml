@@ -8,3 +8,13 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://dpg-d2f36n6mcj7s73bm8090-a.oregon-postgres.render.com/studentportal_qo3i
+      - key: SPRING_DATASOURCE_USERNAME
+        value: studentportal_qo3i_user
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: rUoOiAJVBT26twEwDyGvyce26wnmmZol
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
