@@ -64,6 +64,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/student/**").hasAuthority("ROLE_STUDENT")
+                        .requestMatchers("/cashier/**").hasAuthority("ROLE_CASHIER") // ✅ Added cashier role
                         .requestMatchers("/dashboard").authenticated()
                         .anyRequest().authenticated()
                 )

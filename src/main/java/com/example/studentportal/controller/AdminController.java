@@ -31,21 +31,20 @@ public class AdminController {
     private final CourseService courseService;
     private final ActivityLogService activityLogService;
     private final SectionService sectionService;
-    private final AnnouncementService announcementService;  // Added
+    private final AnnouncementService announcementService;
 
     public AdminController(UserService userService,
                            CourseService courseService,
                            ActivityLogService activityLogService,
                            SectionService sectionService,
-                           AnnouncementService announcementService) {  // Added parameter
+                           AnnouncementService announcementService) {
         this.userService = userService;
         this.courseService = courseService;
         this.activityLogService = activityLogService;
         this.sectionService = sectionService;
-        this.announcementService = announcementService;  // Initialize
+        this.announcementService = announcementService;
     }
 
-    /* ───────────────────────── Admin Dashboard ───────────────────────── */
     @GetMapping("/dashboard")
     public String adminDashboard(Model model,
                                  Principal principal,
@@ -61,16 +60,12 @@ public class AdminController {
         model.addAttribute("pendingActions", activityLogService.countPendingActions());
         model.addAttribute("recentActivities", activityLogService.getRecentActivities());
 
-        // Add Announcement model attribute for form binding
         model.addAttribute("announcement", new com.example.studentportal.model.Announcement());
-
-        // Optional: add all announcements to model if you want to show existing ones
         model.addAttribute("announcements", announcementService.getAllAnnouncements());
 
         return "admin/admindashboard";
     }
 
-    /* ───────────────────────── Manage Users ───────────────────────── */
     @GetMapping("/users")
     public String manageUsers(Model model,
                               Principal principal,
@@ -84,7 +79,6 @@ public class AdminController {
         return "admin/manageuser";
     }
 
-    /* ───────────────────── Show Add User Form ───────────────────── */
     @GetMapping("/users/add")
     public String showAddUserForm(Model model,
                                   Principal principal,
@@ -99,7 +93,6 @@ public class AdminController {
         return "admin/adduser";
     }
 
-    /* ───────────────────── Handle Add User Submission ───────────────────── */
     @PostMapping("/users/save")
     public String saveUser(@ModelAttribute("user") User user,
                            Principal principal,
@@ -113,13 +106,19 @@ public class AdminController {
         setNoCacheHeaders(response);
 
         try {
-            // Fix: Bind section properly using section.id from form
-            if ("STUDENT".equalsIgnoreCase(user.getRole())
-                    && user.getSection() != null
-                    && user.getSection().getId() != null) {
-                Section section = sectionService.findById(user.getSection().getId())
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid section ID"));
-                user.setSection(section);
+            // Only process section if user is a STUDENT
+            if ("STUDENT".equalsIgnoreCase(user.getRole())) {
+                if (user.getSection() != null && user.getSection().getId() != null) {
+                    Section section = sectionService.findById(user.getSection().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid section ID"));
+                    user.setSection(section);
+                }
+            } else {
+                // Clear student-specific fields for non-student roles
+                user.setSection(null);
+                user.setStudentId(null);
+                user.setYearLevel(null);
+                user.setCourse(null);
             }
 
             // Capture raw password before encoding
@@ -143,7 +142,6 @@ public class AdminController {
                 generateQRCode(qrContent, 250, 250, path);
             }
 
-            // Add cache-busting parameter
             model.addAttribute("qrCodePath", "/qr/" + fileName + "?v=" + System.currentTimeMillis());
             model.addAttribute("userEmail", user.getEmail());
             model.addAttribute("userPassword", rawPassword);
@@ -155,7 +153,6 @@ public class AdminController {
         }
     }
 
-    /* ───────────────────── Get Sections by Course and Year ───────────────────── */
     @GetMapping("/sections/by-course-and-year")
     @ResponseBody
     public ResponseEntity<?> getSectionsByCourseAndYear(
@@ -170,7 +167,6 @@ public class AdminController {
         return ResponseEntity.ok(sections);
     }
 
-    /* ───────────────────────── Utility Method ───────────────────────── */
     private void setNoCacheHeaders(HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");

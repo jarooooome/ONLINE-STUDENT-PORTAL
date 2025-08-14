@@ -17,6 +17,8 @@ public class DashboardRedirectController {
                     return "redirect:/admin/dashboard";
                 } else if (role.equals("ROLE_STUDENT")) {
                     return "redirect:/student/dashboard";
+                } else if (role.equals("ROLE_CASHIER")) {
+                    return "redirect:/cashier/dashboard";
                 }
             }
         }

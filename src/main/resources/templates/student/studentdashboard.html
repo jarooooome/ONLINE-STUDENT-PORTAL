@@ -206,9 +206,11 @@
             <a href="/student/schedule" class="nav-link">
                 <i class="fas fa-calendar me-2"></i>Class Schedule
             </a>
-            <a href="/student/tuition" class="nav-link">
+            <a href="/student/tuition-balance"
+               class="nav-link [[${#httpServletRequest.requestURI == '/student/tuition'} ? 'active' : '']]">
                 <i class="fas fa-dollar-sign me-2"></i>Tuition Balance
             </a>
+
             <!-- Updated Academic Calendar link -->
             <a href="/student/calendar" class="nav-link">
                 <i class="fas fa-calendar-day me-2"></i>Academic Calendar
