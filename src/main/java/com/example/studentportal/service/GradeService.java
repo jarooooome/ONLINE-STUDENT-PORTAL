@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class GradeService {
@@ -102,4 +101,9 @@ public class GradeService {
         }
     }
 
+    // ✅ New method for student-grades.html
+    @Transactional(readOnly = true)
+    public List<Grade> getGradesForStudent(User student) {
+        return gradeRepo.findByStudent(student);
+    }
 }

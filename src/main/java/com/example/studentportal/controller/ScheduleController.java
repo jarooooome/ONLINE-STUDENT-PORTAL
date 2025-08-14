@@ -1,9 +1,9 @@
 package com.example.studentportal.controller;
 
 import com.example.studentportal.model.Schedule;
+import com.example.studentportal.model.ScheduleDay;
 import com.example.studentportal.model.Section;
 import com.example.studentportal.model.Subject;
-import com.example.studentportal.service.InstructorService;
 import com.example.studentportal.service.ScheduleService;
 import com.example.studentportal.service.SubjectService;
 import com.example.studentportal.service.CourseService;
@@ -30,9 +30,6 @@ public class ScheduleController {
     private CourseService courseService;
 
     @Autowired
-    private InstructorService instructorService;
-
-    @Autowired
     private SectionService sectionService;
 
     @GetMapping("/add")
@@ -40,7 +37,6 @@ public class ScheduleController {
         List<Subject> subjects = subjectService.getAllSubjects();
         model.addAttribute("subjects", subjects);
         model.addAttribute("courses", courseService.getAllCourses());
-        model.addAttribute("instructors", instructorService.getAllInstructors());
         model.addAttribute("schedule", new Schedule());
         return "admin/addschedule";
     }
@@ -48,46 +44,50 @@ public class ScheduleController {
     @PostMapping("/save")
     public String saveSchedule(@ModelAttribute("schedule") Schedule schedule,
                                @RequestParam("subjectId") Long subjectId,
-                               @RequestParam("instructorId") Long instructorId,
+                               @RequestParam("professor") String professor,
                                @RequestParam("sectionId") Long sectionId,
-                               @RequestParam("day") String day,
+                               @RequestParam("room") String room,
+                               @RequestParam("days") List<String> days,
                                @RequestParam("startTime") String startTime,
                                @RequestParam("endTime") String endTime,
-                               @RequestParam("room") String room,
                                RedirectAttributes redirectAttributes) {
         try {
             // Validate
-            if (subjectId == null) {
-                throw new IllegalArgumentException("Subject is required");
-            }
-            if (instructorId == null) {
-                throw new IllegalArgumentException("Instructor is required");
-            }
-            if (sectionId == null) {
-                throw new IllegalArgumentException("Section is required");
-            }
+            if (subjectId == null) throw new IllegalArgumentException("Subject is required");
+            if (professor == null || professor.trim().isEmpty()) throw new IllegalArgumentException("Professor is required");
+            if (sectionId == null) throw new IllegalArgumentException("Section is required");
+            if (days == null || days.isEmpty()) throw new IllegalArgumentException("At least one day is required");
+            if (startTime == null || startTime.isEmpty()) throw new IllegalArgumentException("Start time is required");
+            if (endTime == null || endTime.isEmpty()) throw new IllegalArgumentException("End time is required");
 
             // Set subject
             Subject subject = subjectService.getSubjectById(subjectId);
-            if (subject == null) {
-                throw new IllegalArgumentException("Invalid subject ID");
-            }
+            if (subject == null) throw new IllegalArgumentException("Invalid subject ID");
             schedule.setSubject(subject);
 
-            // Set instructor name
-            String instructorName = instructorService.getInstructorById(instructorId).getFullName();
-            schedule.setInstructor(instructorName);
+            // Set professor name
+            schedule.setProfessor(professor.trim());
 
             // Set section
             Section section = sectionService.findById(sectionId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid section ID"));
             schedule.setSection(section);
 
-            // Set day, time, room
-            schedule.setDay(day);
-            schedule.setStartTime(startTime);
-            schedule.setEndTime(endTime);
+            // Set room
             schedule.setRoom(room);
+
+            // Clear existing schedule days if any
+            schedule.getScheduleDays().clear();
+
+            // Add multiple schedule days with same time for all selected days
+            for (String day : days) {
+                ScheduleDay scheduleDay = new ScheduleDay();
+                scheduleDay.setDay(day);
+                scheduleDay.setStartTime(startTime);
+                scheduleDay.setEndTime(endTime);
+                scheduleDay.setSchedule(schedule);
+                schedule.getScheduleDays().add(scheduleDay);
+            }
 
             // Save
             scheduleService.saveSchedule(schedule);
@@ -109,7 +109,6 @@ public class ScheduleController {
         return "admin/schedules";
     }
 
-    // ✅ New method for deleting schedule
     @GetMapping("/delete/{id}")
     public String deleteSchedule(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {

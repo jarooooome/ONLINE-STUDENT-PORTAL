@@ -112,6 +112,28 @@
             color: var(--dark-text) !important;
             border-color: #999 !important;
         }
+
+        .profile-table {
+            width: 100%;
+        }
+        .profile-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .profile-table tr:last-child td {
+            border-bottom: none;
+        }
+        .profile-table .label {
+            font-weight: bold;
+            width: 30%;
+        }
+
+        .dark-mode .profile-table {
+            color: var(--dark-text);
+        }
+        .dark-mode .profile-table td {
+            border-bottom-color: #555;
+        }
     </style>
 </head>
 <body>
@@ -153,10 +175,52 @@
                 <i class="fas fa-moon dark-toggle ms-3" id="darkToggle" title="Toggle dark mode"></i>
             </div>
 
-            <!-- Profile Info -->
+            <!-- Profile Display -->
             <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Profile Information</h5>
+                    <button class="btn btn-light btn-sm" id="editProfileBtn">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="profile-table">
+                        <tr>
+                            <td class="label">First Name</td>
+                            <td th:text="${student.firstName}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Last Name</td>
+                            <td th:text="${student.lastName}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Email</td>
+                            <td th:text="${student.email}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Student ID</td>
+                            <td th:text="${student.studentId}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Enrolled Course</td>
+                            <td th:text="${student.course.title}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Year Level</td>
+                            <td th:text="${student.yearLevel}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Contact Number</td>
+                            <td th:text="${student.contactNumber}"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Edit Profile Form (Hidden by default) -->
+            <div class="card mb-4" id="editProfileForm" style="display: none;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Edit Profile Information</h5>
                 </div>
                 <div class="card-body">
                     <form th:action="@{/student/profile/update}" th:object="${student}" method="post">
@@ -199,13 +263,22 @@
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-success">Update Info</button>
-                            <!-- Change Password button moved here -->
-                            <a href="/student/change-password" class="btn btn-warning">
-                                <i class="fas fa-key me-1"></i> Change Password
-                            </a>
+                            <button type="submit" class="btn btn-success">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Password Management</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/student/change-password" class="btn btn-warning">
+                        <i class="fas fa-key me-1"></i> Change Password
+                    </a>
                 </div>
             </div>
         </main>
@@ -252,6 +325,25 @@
     toggle.addEventListener("click", () => {
         body.classList.toggle("dark-mode");
         localStorage.setItem("dark-mode", body.classList.contains("dark-mode") ? "enabled" : "disabled");
+    });
+</script>
+
+<!-- Edit Profile Toggle -->
+<script>
+    const editProfileBtn = document.getElementById("editProfileBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const editProfileForm = document.getElementById("editProfileForm");
+
+    editProfileBtn.addEventListener("click", () => {
+        editProfileForm.style.display = "block";
+        window.scrollTo({
+            top: editProfileForm.offsetTop - 20,
+            behavior: 'smooth'
+        });
+    });
+
+    cancelEditBtn.addEventListener("click", () => {
+        editProfileForm.style.display = "none";
     });
 </script>
 

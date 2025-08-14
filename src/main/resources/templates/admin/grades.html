@@ -99,11 +99,12 @@
             <div class="row">
               <div class="col-md-4">
                 <label class="form-label">Student</label>
-                <select class="form-select" name="studentId">
+                <select class="form-select" name="studentId" id="studentFilter">
                   <option value="">All Students</option>
                   <option th:each="student : ${students}"
                           th:value="${student.id}"
                           th:text="${student.firstName + ' ' + student.lastName}"
+                          th:attr="data-course-id=${student.course?.id}"
                           th:selected="${param.studentId != null && param.studentId == student.id.toString()}">
                   </option>
                 </select>
@@ -158,11 +159,12 @@
             <div class="row">
               <div class="col-md-6">
                 <label class="form-label">Subject</label>
-                <select class="form-select" name="subjectId">
+                <select class="form-select" name="subjectId" id="subjectFilter">
                   <option value="">All Subjects</option>
                   <option th:each="subject : ${subjects}"
                           th:value="${subject.id}"
                           th:text="${subject.name}"
+                          th:attr="data-course-id=${subject.course?.id}"
                           th:selected="${param.subjectId != null && param.subjectId == subject.id.toString()}">
                   </option>
                 </select>
@@ -320,11 +322,12 @@
               <div class="modal-body">
                 <div class="mb-3">
                   <label class="form-label">Student</label>
-                  <select class="form-select" name="studentId" required>
+                  <select class="form-select" name="studentId" id="modalStudentSelect" required>
                     <option value="">Select Student</option>
                     <option th:each="student : ${students}"
                             th:value="${student.id}"
-                            th:text="${student.firstName + ' ' + student.lastName + ' (Section: ' + (student.section?.name ?: 'None') + ', Course: ' + (student.course?.name ?: 'None') + ')'}">
+                            th:text="${student.firstName + ' ' + student.lastName + ' (Section: ' + (student.section?.name ?: 'None') + ', Course: ' + (student.course?.name ?: 'None') + ')'}"
+                            th:attr="data-course-id=${student.course?.id}">
                     </option>
                   </select>
                 </div>
@@ -335,7 +338,7 @@
                     <option th:each="subject : ${subjects}"
                             th:value="${subject.id}"
                             th:text="${subject.name}"
-                            th:attr="data-semester=${subject.semester}">
+                            th:attr="data-semester=${subject.semester}, data-course-id=${subject.course?.id}">
                     </option>
                   </select>
                 </div>
@@ -428,12 +431,54 @@
           document.getElementById('semesterInput').value = semester || '';
       });
 
+      // Filter subjects based on selected student's course
+      function filterSubjectsByCourse(courseId) {
+          const subjectSelect = document.getElementById('subjectSelect');
+          const allSubjects = Array.from(subjectSelect.querySelectorAll('option[data-course-id]'));
+
+          // Reset to all subjects if no course selected
+          if (!courseId) {
+              allSubjects.forEach(option => {
+                  option.style.display = '';
+              });
+              return;
+          }
+
+          // Filter subjects by course
+          allSubjects.forEach(option => {
+              if (option.getAttribute('data-course-id') === courseId) {
+                  option.style.display = '';
+              } else {
+                  option.style.display = 'none';
+              }
+          });
+
+          // Reset selection if current selection is hidden
+          if (subjectSelect.selectedOptions[0].style.display === 'none') {
+              subjectSelect.selectedIndex = 0;
+              document.getElementById('semesterInput').value = '';
+          }
+      }
+
+      // Handle student selection change in modal
+      document.getElementById('modalStudentSelect').addEventListener('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const courseId = selectedOption.getAttribute('data-course-id');
+          filterSubjectsByCourse(courseId);
+      });
+
       // Initialize the semester field when modal is shown
       document.getElementById('addGradeModal').addEventListener('show.bs.modal', function() {
           const subjectSelect = document.getElementById('subjectSelect');
           const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
           const semester = selectedOption ? selectedOption.getAttribute('data-semester') : '';
           document.getElementById('semesterInput').value = semester || '';
+
+          // Filter subjects based on initially selected student
+          const studentSelect = document.getElementById('modalStudentSelect');
+          const selectedStudent = studentSelect.options[studentSelect.selectedIndex];
+          const courseId = selectedStudent.getAttribute('data-course-id');
+          filterSubjectsByCourse(courseId);
       });
   });
 

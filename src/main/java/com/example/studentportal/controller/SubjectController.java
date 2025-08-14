@@ -6,13 +6,16 @@ import com.example.studentportal.model.Course;
 import com.example.studentportal.repository.SubjectRepository;
 import com.example.studentportal.repository.ScheduleRepository;
 import com.example.studentportal.repository.CourseRepository;
+import com.example.studentportal.dto.SubjectDTO; // <-- add this import
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -43,12 +46,25 @@ public class SubjectController {
     public String showAddSubjectForm(Model model) {
         model.addAttribute("subject", new Subject());
         model.addAttribute("courses", courseRepository.findAll());
+        model.addAttribute("existingSubjects", subjectRepository.findAll());
         return "admin/addsubject";
     }
 
     // Save the new subject
     @PostMapping("/subjects/save")
-    public String saveSubject(@ModelAttribute("subject") Subject subject) {
+    public String saveSubject(@ModelAttribute("subject") Subject subject, RedirectAttributes redirectAttributes) {
+        // Check for duplicate subject code
+        if (subjectRepository.existsByCodeIgnoreCase(subject.getCode())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Subject code already exists");
+            return "redirect:/admin/subjects/add";
+        }
+
+        // Check for duplicate subject name
+        if (subjectRepository.existsByNameIgnoreCase(subject.getName())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Subject name already exists");
+            return "redirect:/admin/subjects/add";
+        }
+
         subjectRepository.save(subject);
         return "redirect:/admin/subjects";
     }
@@ -101,11 +117,21 @@ public class SubjectController {
         return "redirect:/admin/subjects";
     }
 
-    // Required by addschedule.html to load subjects by courseId
+    // Required by addschedule.html to load subjects by courseId using DTOs
     @GetMapping("/subjects/by-course")
     @ResponseBody
-    public List<Subject> getSubjectsByCourse(@RequestParam Long courseId) {
+    public List<SubjectDTO> getSubjectsByCourse(@RequestParam Long courseId) {
         List<Subject> subjects = subjectRepository.findByCourseId(courseId);
-        return subjects != null ? subjects : List.of(); // ensure never returning null
+        if (subjects == null) return List.of();
+
+        // Map to DTO to avoid JSON recursion
+        return subjects.stream()
+                .map(s -> new SubjectDTO(
+                        s.getId(),
+                        s.getCode(),
+                        s.getName(),
+                        s.getSemester()
+                ))
+                .collect(Collectors.toList());
     }
 }

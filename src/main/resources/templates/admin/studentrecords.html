@@ -142,6 +142,7 @@
                     <thead class="table-light">
                     <tr>
                         <th>ID</th>
+                        <th>Student ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Course</th>
@@ -155,6 +156,7 @@
                     <tbody>
                     <tr th:each="student : ${students}">
                         <td th:text="${student.id}">1</td>
+                        <td th:text="${student.studentId}">STU-001</td>
                         <td th:text="${student.firstName + ' ' + student.lastName}">Juan Dela Cruz</td>
                         <td th:text="${student.email}">juan@example.com</td>
                         <td th:text="${student.course != null ? student.course.name : 'Not assigned'}">BSA</td>
@@ -172,7 +174,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="9" class="text-center text-muted">No student records found.</td>
+                        <td colspan="10" class="text-center text-muted">No student records found.</td>
                     </tr>
                     </tbody>
                 </table>

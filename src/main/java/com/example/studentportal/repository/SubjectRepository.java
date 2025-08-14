@@ -8,5 +8,11 @@ import java.util.List;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
-    List<Subject> findByCourseId(Long courseId); // ✅ For filtering subjects by course
+
+    // Existing method for filtering subjects by course
+    List<Subject> findByCourseId(Long courseId);
+
+    // New methods for duplicate checking (case-insensitive)
+    boolean existsByCodeIgnoreCase(String code);
+    boolean existsByNameIgnoreCase(String name);
 }

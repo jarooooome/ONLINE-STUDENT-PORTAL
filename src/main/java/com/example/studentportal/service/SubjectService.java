@@ -2,6 +2,7 @@ package com.example.studentportal.service;
 
 import com.example.studentportal.model.Subject;
 import com.example.studentportal.repository.SubjectRepository;
+import com.example.studentportal.dto.SubjectDTO; // <-- add this import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class SubjectService {
             existingSubject.setCode(updatedSubject.getCode());
             existingSubject.setName(updatedSubject.getName());
             existingSubject.setDescription(updatedSubject.getDescription());
-            existingSubject.setSemester(updatedSubject.getSemester()); // <-- added this line
+            existingSubject.setSemester(updatedSubject.getSemester()); // <-- existing line
             subjectRepository.save(existingSubject);
         }
     }
@@ -47,6 +48,21 @@ public class SubjectService {
     public List<Subject> findAllActiveSubjects() {
         return subjectRepository.findAll().stream()
                 .filter(Subject::isActive)
+                .collect(Collectors.toList());
+    }
+
+    // New method: Return subjects by course as DTOs to avoid JSON recursion
+    public List<SubjectDTO> findSubjectsByCourseId(Long courseId) {
+        List<Subject> subjects = subjectRepository.findByCourseId(courseId);
+        if (subjects == null) return List.of();
+
+        return subjects.stream()
+                .map(s -> new SubjectDTO(
+                        s.getId(),
+                        s.getCode(),
+                        s.getName(),
+                        s.getSemester()
+                ))
                 .collect(Collectors.toList());
     }
 }

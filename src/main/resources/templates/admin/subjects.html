@@ -55,6 +55,11 @@
             border-radius: 0.25rem;
             margin-bottom: 1rem;
         }
+
+        .schedule-days {
+            display: inline-block;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -72,9 +77,9 @@
             <a href="/admin/users"><i class="fas fa-users me-2"></i>Manage Users</a>
             <a href="/admin/students"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
             <a href="/admin/subjects" class="active"><i class="fas fa-book me-2"></i>Subjects</a>
-            <a href="#"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
+            <a href="/admin/grades"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
             <a href="#"><i class="fas fa-wallet me-2"></i>Tuition & Balances</a>
-            <a href="#"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
+            <a href="/admin/calendar"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
 
             <!-- Logout -->
             <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto px-3 py-2">
@@ -84,7 +89,7 @@
 
         <!-- Main Content -->
         <main class="col-md-10 p-4">
-            <!-- Debug Info (remove in production) -->
+            <!-- Debug Info -->
             <div class="debug-info" th:if="${debug}">
                 Schedules Count: <span th:text="${#lists.size(schedules)}"></span><br>
                 Subjects Count: <span th:text="${#lists.size(subjects)}"></span>
@@ -107,6 +112,7 @@
                                 <th>Code</th>
                                 <th>Name</th>
                                 <th>Description</th>
+                                <th>Semester</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                             </thead>
@@ -115,6 +121,7 @@
                                 <td th:text="${subject.code}">CS101</td>
                                 <td th:text="${subject.name}">Intro to CS</td>
                                 <td th:text="${subject.description}">Basics of computing</td>
+                                <td th:text="${subject.semester}">1st Sem</td>
                                 <td class="text-end">
                                     <a th:href="@{'/admin/subjects/edit/' + ${subject.id}}" class="btn btn-sm btn-warning me-2">
                                         <i class="fas fa-edit"></i> Edit
@@ -126,7 +133,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(subjects)}">
-                                <td colspan="4" class="text-center text-muted">No subjects found.</td>
+                                <td colspan="5" class="text-center text-muted">No subjects found.</td>
                             </tr>
                             </tbody>
                         </table>
@@ -149,22 +156,27 @@
                             <thead class="table-light">
                             <tr>
                                 <th>Subject</th>
-                                <th>Section</th>
-                                <th>Instructor</th>
-                                <th>Day</th>
+                                <th>Course - Section</th>
+                                <th>Professor</th>
+                                <th>Days</th>
                                 <th>Time</th>
                                 <th>Room</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="schedule : ${schedules}" th:with="timeDisplay=${schedule.startTime + ' - ' + schedule.endTime}">
-                                <td th:text="${schedule.subject?.name} ?: 'N/A'">Math 101</td>
-                                <td th:text="${schedule.section.course.code + '-' + schedule.section.yearLevel + schedule.section.name}">BSIT-1A</td>
-                                <td th:text="${schedule.instructor} ?: 'Not assigned'">Prof. Santos</td>
-                                <td th:text="${schedule.day} ?: 'N/A'">Monday</td>
-                                <td th:text="${timeDisplay} ?: 'Not scheduled'">8:00 AM - 10:00 AM</td>
-                                <td th:text="${schedule.room} ?: 'N/A'">Room 204</td>
+                            <tr th:each="schedule : ${schedules}">
+                                <td th:text="${schedule.subject?.code + ' - ' + schedule.subject?.name}">MATH101 - Algebra</td>
+                                <td th:text="${schedule.section?.course?.code + '-' + schedule.section?.yearLevel + schedule.section?.name}">BSIT-1A</td>
+                                <td th:text="${schedule.professor} ?: 'Not assigned'">Prof. Santos</td>
+                                <td>
+                                    <span th:each="daySchedule : ${schedule.scheduleDays}" class="schedule-days"
+                                          th:text="${daySchedule.day}">Mon</span>
+                                </td>
+                                <td th:text="${schedule.scheduleDays.size() > 0 ? schedule.scheduleDays[0].startTime + ' - ' + schedule.scheduleDays[0].endTime : 'Not Scheduled'}">
+                                    8:00 - 10:00
+                                </td>
+                                <td th:text="${schedule.room}">Room 204</td>
                                 <td class="text-end">
                                     <a th:href="@{'/admin/schedules/edit/' + ${schedule.id}}" class="btn btn-sm btn-warning me-2">
                                         <i class="fas fa-edit"></i> Edit

@@ -30,8 +30,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Enable CSRF protection (remove the disable)
-                // .csrf(AbstractHttpConfigurer::disable)
+                // Enable CSRF protection
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/calendar/events/**") // Allow calendar API endpoints
+                )
 
                 // Cache and frame options
                 .headers(headers -> headers
