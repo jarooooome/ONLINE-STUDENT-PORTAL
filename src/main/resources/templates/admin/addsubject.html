@@ -43,18 +43,15 @@
       transition: all 0.3s ease;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .btn-save:hover {
       background-color: #218838;
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
-
     .btn-save:active {
       transform: translateY(0);
       box-shadow: 0 2px 3px rgba(0,0,0,0.1);
     }
-
     .btn-cancel {
       background-color: #f8f9fa;
       color: #495057;
@@ -65,19 +62,16 @@
       transition: all 0.3s ease;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-
     .btn-cancel:hover {
       background-color: #e2e6ea;
       color: #212529;
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-
     .btn-cancel:active {
       transform: translateY(0);
       box-shadow: 0 2px 3px rgba(0,0,0,0.05);
     }
-
     /* Button container */
     .form-actions {
       display: flex;
@@ -86,14 +80,12 @@
       padding-top: 16px;
       border-top: 1px solid #eee;
     }
-
     /* Card styling */
     .form-card {
       border-radius: 12px;
       border: none;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
-
     /* Input focus effects */
     .form-control:focus, .form-select:focus {
       border-color: #86b7fe;
@@ -115,9 +107,8 @@
       <a href="/admin/dashboard"><i class="fas fa-home me-2"></i>Dashboard</a>
       <a href="/admin/users"><i class="fas fa-users me-2"></i>Manage Users</a>
       <a href="/admin/students"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
-      <a href="/admin/subjects" class="active"><i class="fas fa-book me-2"></i>Subjects</a>
+      <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
       <a href="#"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
-      <a href="#"><i class="fas fa-wallet me-2"></i>Tuition & Balances</a>
       <a href="#"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
 
       <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto px-3 py-2">
@@ -161,7 +152,6 @@
             <option value="" disabled selected>Select Semester</option>
             <option value="1st Sem">1st Semester</option>
             <option value="2nd Sem">2nd Semester</option>
-            <option value="3rd Sem">3rd Semester</option>
           </select>
         </div>
 
@@ -196,14 +186,12 @@
       const nameFeedback = document.getElementById('nameFeedback');
       const submitBtn = document.getElementById('submitBtn');
 
-      // Store existing subjects from server (you might want to fetch this via API)
       const existingSubjects = [
           <th:block th:each="subject : ${existingSubjects}">
               { code: '[[${subject.code}]]', name: '[[${subject.name}]]' },
           </th:block>
       ];
 
-      // Client-side validation for duplicate subject code
       codeInput.addEventListener('blur', function() {
           const codeValue = this.value.trim();
           if (codeValue) {
@@ -222,7 +210,6 @@
           }
       });
 
-      // Client-side validation for duplicate subject name
       nameInput.addEventListener('blur', function() {
           const nameValue = this.value.trim();
           if (nameValue) {
@@ -241,11 +228,9 @@
           }
       });
 
-      // Form submission validation
       form.addEventListener('submit', function(e) {
           let isValid = true;
 
-          // Check subject code
           const codeValue = codeInput.value.trim();
           if (existingSubjects.some(subject =>
               subject.code.toLowerCase() === codeValue.toLowerCase()
@@ -255,7 +240,6 @@
               isValid = false;
           }
 
-          // Check subject name
           const nameValue = nameInput.value.trim();
           if (existingSubjects.some(subject =>
               subject.name.toLowerCase() === nameValue.toLowerCase()
@@ -267,7 +251,6 @@
 
           if (!isValid) {
               e.preventDefault();
-              // Scroll to first error
               const firstInvalid = form.querySelector('.is-invalid');
               if (firstInvalid) {
                   firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -72,9 +72,9 @@
       <a href="/admin/dashboard"><i class="fas fa-home me-2"></i>Dashboard</a>
       <a href="/admin/users"><i class="fas fa-users me-2"></i>Manage Users</a>
       <a href="/admin/students"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
-      <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects</a>
+      <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
       <a href="/admin/grades" class="active"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
-      <a href="#"><i class="fas fa-wallet me-2"></i>Tuition & Balances</a>
+
       <a href="/admin/calendar"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
       <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto px-3 py-2">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

@@ -6,7 +6,7 @@ import com.example.studentportal.model.Course;
 import com.example.studentportal.repository.SubjectRepository;
 import com.example.studentportal.repository.ScheduleRepository;
 import com.example.studentportal.repository.CourseRepository;
-import com.example.studentportal.dto.SubjectDTO; // <-- add this import
+import com.example.studentportal.dto.SubjectDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -69,7 +69,7 @@ public class SubjectController {
         return "redirect:/admin/subjects";
     }
 
-    // Show form to edit a subject
+    // Show form to edit a subject (UPDATED)
     @GetMapping("/subjects/edit/{id}")
     public String showEditSubjectForm(@PathVariable("id") Long id, Model model) {
         Subject subject = subjectRepository.findById(id).orElse(null);
@@ -77,6 +77,7 @@ public class SubjectController {
 
         model.addAttribute("subject", subject);
         model.addAttribute("courses", courseRepository.findAll());
+        model.addAttribute("existingSubjects", subjectRepository.findAll()); // <-- added
         return "admin/editsubject";
     }
 

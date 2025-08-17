@@ -45,9 +45,8 @@
       <a href="/admin/dashboard" class="nav-link">Dashboard</a>
       <a href="/admin/users" class="nav-link">Manage Users</a>
       <a href="#" class="nav-link">Student Records</a>
-      <a href="#" class="nav-link">Subjects</a>
+      <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
       <a href="#" class="nav-link">Grade Management</a>
-      <a href="#" class="nav-link">Tuition and Balance Management</a>
       <a href="#" class="nav-link">Academic Calendar Setup</a>
       <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
         <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
@@ -58,7 +57,7 @@
     <main class="col-md-10 p-4">
       <h2 class="mb-4">Add New User</h2>
 
-      <form th:action="@{/admin/users/save}" th:object="${user}" method="post">
+      <form th:action="@{/admin/users/save}" th:object="${user}" method="post" id="addUserForm">
         <!-- CSRF Token -->
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
@@ -96,6 +95,7 @@
         <div class="mb-3" id="studentIdWrapper" style="display:none;">
           <label for="studentId" class="form-label">Student ID</label>
           <input th:field="*{studentId}" type="text" class="form-control" id="studentId">
+          <div class="invalid-feedback" id="studentIdFeedback">Student ID already exists</div>
         </div>
 
         <div class="mb-3" id="yearLevelWrapper" style="display:none;">
@@ -113,9 +113,7 @@
           <label for="course" class="form-label">Course</label>
           <select th:field="*{course.id}" class="form-select" id="course">
             <option value="">-- Select Course --</option>
-            <option th:each="course : ${courses}"
-                    th:value="${course.id}"
-                    th:text="${course.code + ' - ' + course.name}"></option>
+            <option th:each="course : ${courses}" th:value="${course.id}" th:text="${course.code + ' - ' + course.name}"></option>
           </select>
         </div>
 
@@ -145,6 +143,9 @@
         const courseField = document.getElementById('courseWrapper');
         const sectionField = document.getElementById('sectionWrapper');
         const studentIdField = document.getElementById('studentIdWrapper');
+        const studentIdInput = document.getElementById('studentId');
+        const studentIdFeedback = document.getElementById('studentIdFeedback');
+        const form = document.getElementById('addUserForm');
 
         function toggleStudentFields() {
           const isStudent = roleField.value === 'STUDENT';
@@ -153,7 +154,6 @@
           sectionField.style.display = isStudent ? 'block' : 'none';
           studentIdField.style.display = isStudent ? 'block' : 'none';
 
-          // Toggle required attributes dynamically
           document.getElementById('yearLevel').required = isStudent;
           document.getElementById('course').required = isStudent;
           document.getElementById('section').required = isStudent;
@@ -162,7 +162,8 @@
             document.getElementById('yearLevel').value = '';
             document.getElementById('course').value = '';
             document.getElementById('section').innerHTML = '<option value="">-- Select Course and Year First --</option>';
-            document.getElementById('studentId').value = '';
+            studentIdInput.value = '';
+            studentIdInput.classList.remove('is-invalid');
           }
         }
 
@@ -189,7 +190,6 @@
             })
             .then(sections => {
               sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
-
               if (sections && sections.length > 0) {
                 sections.forEach(section => {
                   const option = document.createElement('option');
@@ -206,6 +206,29 @@
               sectionSelect.innerHTML = '<option value="">Error loading sections</option>';
             });
         }
+
+        // Validate Student ID uniqueness
+        function validateStudentId() {
+          const studentId = studentIdInput.value.trim();
+          if (!studentId) return;
+
+          fetch('/admin/users/student-ids')
+            .then(res => res.json())
+            .then(existingIds => {
+              if (existingIds.includes(studentId)) {
+                studentIdInput.classList.add('is-invalid');
+              } else {
+                studentIdInput.classList.remove('is-invalid');
+              }
+            })
+            .catch(err => console.error(err));
+        }
+
+        studentIdInput.addEventListener('blur', validateStudentId);
+
+        form.addEventListener('submit', function(e) {
+          if (studentIdInput.classList.contains('is-invalid')) e.preventDefault();
+        });
 
         roleField.addEventListener('change', toggleStudentFields);
         document.getElementById('course').addEventListener('change', loadSections);

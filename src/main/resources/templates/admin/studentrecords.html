@@ -72,9 +72,9 @@
             <a href="/admin/dashboard"><i class="fas fa-home me-2"></i>Dashboard</a>
             <a href="/admin/users"><i class="fas fa-users me-2"></i>Manage Users</a>
             <a href="/admin/students" class="active"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
-            <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects</a>
+            <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
             <a href="/admin/grades"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
-            <a href="/admin/tuition"><i class="fas fa-wallet me-2"></i>Tuition & Balances</a>
+
             <a href="/admin/calendar"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
 
             <form th:action="@{/auth/logout}" method="post" class="logout-form px-3 py-2">
@@ -150,7 +150,6 @@
                         <th>Section</th>
                         <th>Enrollment Date</th>
                         <th>Status</th>
-                        <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -164,17 +163,9 @@
                         <td th:text="${student.section != null ? student.section.course.code + '-' + student.section.yearLevel + student.section.name : 'Not assigned'}"></td>
                         <td th:text="${student.enrollmentDate != null ? #temporals.format(student.enrollmentDate, 'yyyy-MM-dd') : 'Not enrolled'}">2025-06-01</td>
                         <td th:text="${student.active ? 'Active' : 'Inactive'}">Active</td>
-                        <td>
-                            <a th:href="@{'/admin/students/edit/' + ${student.id}}" class="btn btn-sm btn-warning me-2">Edit</a>
-                            <form th:action="@{'/admin/students/delete/' + ${student.id}}" method="post" style="display:inline;">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure you want to delete this student?');">Delete</button>
-                            </form>
-                        </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="10" class="text-center text-muted">No student records found.</td>
+                        <td colspan="9" class="text-center text-muted">No student records found.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -256,20 +247,14 @@
 
             // Get headers
             table.querySelectorAll('thead th').forEach(th => {
-                // Skip the Actions column
-                if (th.textContent !== 'Actions') {
-                    headers.push(th.textContent);
-                }
+                headers.push(th.textContent);
             });
 
             // Get rows data
             table.querySelectorAll('tbody tr').forEach(tr => {
                 const row = [];
-                tr.querySelectorAll('td').forEach((td, index) => {
-                    // Skip the Actions column (last column)
-                    if (index < tr.cells.length - 1) {
-                        row.push(td.textContent);
-                    }
+                tr.querySelectorAll('td').forEach(td => {
+                    row.push(td.textContent);
                 });
                 rows.push(row);
             });

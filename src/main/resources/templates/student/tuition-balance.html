@@ -5,130 +5,272 @@
     <title>My Tuition Balance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body.dark-mode { background-color:#121212; color:#f5f5f5; }
-        .sidebar { height:100vh; background:#343a40; padding-top:20px; position:fixed; width:240px; }
-        .sidebar a { display:block; color:#fff; padding:12px; text-decoration:none; }
-        .sidebar a:hover { background:#495057; }
-        .main-content { margin-left:240px; padding:20px; }
-        .card { border-radius:10px; }
-        .clock { font-size:0.95rem; font-weight:600; }
-        .status-badge { min-width:80px; }
+        :root {
+          --primary: #4e73df;
+          --primary-dark: #224abe;
+          --light: #f8f9fc;
+          --dark-bg: #1a1a2e;
+          --dark-card: #16213e;
+          --text-light: #f0f0f0;
+        }
+
+        body {
+          background-color: var(--light);
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar {
+          background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+          min-height: 100vh;
+          color: white;
+        }
+
+        .sidebar .nav-link {
+          color: rgba(255,255,255,0.9);
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          margin: 0.25rem 1rem;
+        }
+
+        .sidebar .nav-link:hover {
+          background-color: rgba(255,255,255,0.2);
+        }
+
+        .sidebar .nav-link.active {
+          background-color: rgba(255,255,255,0.3);
+          font-weight: bold;
+        }
+
+        .logout-form {
+          margin: auto 1rem 1rem 1rem;
+        }
+
+        .logout-form button {
+          width: 100%;
+          padding: 0.75rem;
+          border: none;
+          border-radius: 0.5rem;
+          background-color: rgba(255, 255, 255, 0.1);
+          color: white;
+        }
+
+        .logout-form button:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .table th, .table td {
+          vertical-align: middle;
+        }
+
+        /* Dark mode support */
+        body.dark-mode {
+          background-color: var(--dark-bg);
+          color: var(--text-light);
+        }
+
+        body.dark-mode .card {
+          background-color: var(--dark-card);
+          color: var(--text-light);
+        }
+
+        body.dark-mode .table {
+          color: var(--text-light);
+        }
+
+        body.dark-mode .table-light th {
+          background-color: #2c2c54 !important;
+          color: white;
+        }
+
+        #time {
+          font-size: 1.2rem;
+          font-weight: 500;
+        }
+
+        .top-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .dark-toggle {
+          cursor: pointer;
+        }
+
+        .status-badge {
+          min-width: 80px;
+        }
+
+        /* Modal styles for transaction records */
+        #transactionModal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h4 class="text-center text-white">Student Portal</h4>
-        <a th:href="@{/student/dashboard}"><i class="fas fa-home me-2"></i>Dashboard</a>
-        <a th:href="@{/student/profile}"><i class="fas fa-user me-2"></i>Profile</a>
-        <a th:href="@{/student/grades}"><i class="fas fa-graduation-cap me-2"></i>Grades Viewer</a>
-        <a th:href="@{/student/class-schedule}"><i class="fas fa-calendar-alt me-2"></i>Class Schedule</a>
-        <a th:href="@{/student/tuition-balance}" class="bg-primary"><i class="fas fa-money-bill me-2"></i>Tuition Balance</a>
-        <a th:href="@{/student/academic-calendar}"><i class="fas fa-calendar me-2"></i>Academic Calendar</a>
-        <hr class="text-white">
-        <div class="text-center">
-            <button class="btn btn-sm btn-warning" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-        </div>
-        <div class="text-center text-white mt-3 clock" id="clock"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 sidebar d-flex flex-column py-4">
+            <div class="text-white ps-4 mb-3 fs-5 fw-bold">Student Portal</div>
+            <a href="/student/dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+            <a href="/student/profile" class="nav-link">
+                <i class="fas fa-user me-2"></i>Account/Profile
+            </a>
+            <a href="/student/grades" class="nav-link">
+                <i class="fas fa-chart-bar me-2"></i>Grades Viewer
+            </a>
+            <a href="/student/schedule" class="nav-link">
+                <i class="fas fa-calendar me-2"></i>Class Schedule
+            </a>
+            <a href="/student/tuition" class="nav-link active">
+                <i class="fas fa-dollar-sign me-2"></i>Tuition Balance
+            </a>
+            <a href="/student/calendar" class="nav-link">
+                <i class="fas fa-calendar-day me-2"></i>Academic Calendar
+            </a>
+
+            <!-- Logout -->
+            <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
+                <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+            </form>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 p-4">
+            <div class="top-bar">
+                <div>
+                    <h2>My Tuition Balance</h2>
+                    <p class="text-muted">View your assessed fees, outstanding balance, and payment due dates.</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div id="time" class="text-primary"></div>
+                    <div class="form-check form-switch dark-toggle">
+                        <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                        <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row g-4 mt-2">
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-3 bg-light">
+                        <h6 class="text-muted mb-1">Total Tuition Balance</h6>
+                        <h3 class="text-primary mb-0"
+                            th:text="${totalFees != null ? '₱' + #numbers.formatDecimal(totalFees, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-3 bg-light">
+                        <h6 class="text-muted mb-1">Outstanding Balance</h6>
+                        <h3 class="text-danger mb-0"
+                            th:text="${outstandingBalance != null ? '₱' + #numbers.formatDecimal(outstandingBalance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-3 bg-light">
+                        <h6 class="text-muted mb-1">Next Payment Due</h6>
+                        <h4 class="text-warning mb-0" th:text="${nextDueDate ?: 'N/A'}">N/A</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Transactions Button -->
+            <div class="mt-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transactionModal">
+                    <i class="fas fa-receipt me-2"></i>View Payment Transactions
+                </button>
+            </div>
+
+        </main>
     </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h2>My Tuition Balance</h2>
-                <p class="mb-0">View your assessed fees, outstanding balance, and payment due dates.</p>
+<!-- Transaction Records Modal - UPDATED TO MATCH CASHIER-STUDENT.HTML -->
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transactionModalLabel">Payment Transaction History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div>
-                <a class="btn btn-outline-secondary btn-sm" th:href="@{/student/dashboard}">
-                    <i class="fa-solid fa-arrow-left-long"></i> Back to Dashboard
-                </a>
-            </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="row g-4 mt-2">
-            <div class="col-md-4">
-                <div class="card shadow-sm p-3 bg-light">
-                    <h6 class="text-muted mb-1">Total Tuition Balance</h6>
-                    <h3 class="text-primary mb-0"
-                        th:text="${totalFees != null ? '₱' + #numbers.formatDecimal(totalFees, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card shadow-sm p-3 bg-light">
-                    <h6 class="text-muted mb-1">Outstanding Balance</h6>
-                    <h3 class="text-danger mb-0"
-                        th:text="${outstandingBalance != null ? '₱' + #numbers.formatDecimal(outstandingBalance, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card shadow-sm p-3 bg-light">
-                    <h6 class="text-muted mb-1">Next Payment Due</h6>
-                    <h4 class="text-warning mb-0" th:text="${nextDueDate}">N/A</h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Schedule -->
-        <div class="card shadow-sm mt-4">
-            <div class="card-header d-flex align-items-center">
-                <i class="fa-regular fa-calendar me-2"></i>
-                <strong>Payment Schedule</strong>
-            </div>
-            <div class="card-body table-responsive">
+            <div class="modal-body">
                 <table class="table table-striped align-middle">
-                    <thead class="table-dark">
+                    <thead>
                     <tr>
-                        <th>Due Date</th>
+                        <th>Date</th>
                         <th>Amount</th>
-                        <th>Paid</th>
-                        <th>Paid At</th>
+                        <th>Method</th>
+                        <th>Reference</th>
+                        <th>Recorded By</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="p : ${paymentSchedule}">
-                        <td th:text="${p.dueDate}">2025-09-01</td>
-                        <td th:text="${'₱' + #numbers.formatDecimal(p.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
-                        <td>
-                            <span class="badge status-badge"
-                                  th:classappend="${p.paid} ? 'bg-success' : 'bg-danger'"
-                                  th:text="${p.paid} ? 'Paid' : 'Unpaid'">Unpaid</span>
-                        </td>
-                        <td th:text="${p.paidAt != null ? #temporals.format(p.paidAt, 'yyyy-MM-dd HH:mm') : '—'}">—</td>
+                    <tr th:each="t : ${transactions}">
+                        <td th:text="${#temporals.format(t.recordedAt, 'yyyy-MM-dd HH:mm')}">2025-08-15</td>
+                        <td th:text="${'₱' + #numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                        <td th:text="${t.method}">Cash</td>
+                        <td th:text="${t.reference ?: '—'}">OR-001</td>
+                        <td th:text="${t.recordedBy != null ? t.recordedBy.fullName : 'System'}">Cashier</td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(paymentSchedule)}">
-                        <td colspan="4" class="text-center text-muted">No payment schedule available.</td>
+                    <tr th:if="${#lists.isEmpty(transactions)}">
+                        <td colspan="5" class="text-center text-muted">No payment records found</td>
                     </tr>
                     </tbody>
                 </table>
-                <p class="small text-muted mb-0">
-                    Note: This page is for viewing only. Payments are recorded by the cashier and reflected here automatically.
-                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Real-time Clock & Dark Mode Script -->
 <script>
     function updateClock() {
-        const el = document.getElementById('clock');
-        const now = new Date();
-        el.textContent = now.toLocaleString();
+      const now = new Date();
+      document.getElementById('time').textContent = now.toLocaleTimeString();
     }
-    setInterval(updateClock, 1000); updateClock();
 
-    function toggleDarkMode(){
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    }
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Dark Mode Toggle
+    const toggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    toggle.addEventListener('change', function () {
+      if (this.checked) {
+        body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    // Load preference
+    window.addEventListener('DOMContentLoaded', () => {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        body.classList.add('dark-mode');
+        toggle.checked = true;
+      }
+    });
 </script>
 </body>
 </html>

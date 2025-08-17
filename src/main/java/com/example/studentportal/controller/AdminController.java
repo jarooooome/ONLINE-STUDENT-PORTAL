@@ -167,6 +167,17 @@ public class AdminController {
         return ResponseEntity.ok(sections);
     }
 
+    // NEW endpoint for student ID uniqueness check
+    @GetMapping("/users/student-ids")
+    @ResponseBody
+    public ResponseEntity<List<String>> getAllStudentIds() {
+        List<String> studentIds = userService.findAllUsers().stream()
+                .filter(u -> u.getStudentId() != null)
+                .map(u -> u.getStudentId().trim())
+                .toList();
+        return ResponseEntity.ok(studentIds);
+    }
+
     private void setNoCacheHeaders(HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
