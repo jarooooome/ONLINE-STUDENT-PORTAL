@@ -113,6 +113,7 @@
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>Semester</th>
+                                <th>Course</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                             </thead>
@@ -122,6 +123,7 @@
                                 <td th:text="${subject.name}">Intro to CS</td>
                                 <td th:text="${subject.description}">Basics of computing</td>
                                 <td th:text="${subject.semester}">1st Sem</td>
+                                <td th:text="${subject.course?.code}">BSIT</td>
                                 <td class="text-end">
                                     <a th:href="@{'/admin/subjects/edit/' + ${subject.id}}" class="btn btn-sm btn-warning me-2">
                                         <i class="fas fa-edit"></i> Edit
@@ -133,7 +135,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(subjects)}">
-                                <td colspan="5" class="text-center text-muted">No subjects found.</td>
+                                <td colspan="6" class="text-center text-muted">No subjects found.</td>
                             </tr>
                             </tbody>
                         </table>
