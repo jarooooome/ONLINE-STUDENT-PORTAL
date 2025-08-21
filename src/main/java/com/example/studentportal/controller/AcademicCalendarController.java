@@ -23,9 +23,9 @@ public class AcademicCalendarController {
     }
 
     // ---------- Pages ----------
-    @GetMapping("/admin/calendar")
+    @GetMapping("/osa/calendar")
     public String adminCalendarPage() {
-        return "admin/admin-calendar"; // Updated to include admin/ prefix
+        return "osa/academic-calendar"; // Updated to include admin/ prefix
     }
 
     @GetMapping("/student/calendar")

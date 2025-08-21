@@ -11,12 +11,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 
 @Controller
-@RequestMapping("/admin")
-public class AdminAnnouncementController {
+@RequestMapping("/osa")
+public class OsaAnnouncementController {
 
     private final AnnouncementService announcementService;
 
-    public AdminAnnouncementController(AnnouncementService announcementService) {
+    public OsaAnnouncementController(AnnouncementService announcementService) {
         this.announcementService = announcementService;
     }
 
@@ -24,7 +24,7 @@ public class AdminAnnouncementController {
     @GetMapping("/addannouncement")
     public String showAddAnnouncementForm(Model model) {
         model.addAttribute("announcement", new Announcement());
-        return "admin/addannouncement";
+        return "osa/addannouncement";
     }
 
     // Process add form submission
@@ -33,11 +33,11 @@ public class AdminAnnouncementController {
                                   BindingResult result,
                                   RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "admin/addannouncement";
+            return "osa/addannouncement";
         }
         announcementService.saveAnnouncement(announcement);
         redirectAttributes.addFlashAttribute("successMessage", "Announcement added successfully!");
-        return "redirect:/admin/dashboard";
+        return "redirect:/osa/dashboard";
     }
 
     // Show edit form
@@ -46,7 +46,7 @@ public class AdminAnnouncementController {
         Announcement announcement = announcementService.getAnnouncementById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid announcement Id:" + id));
         model.addAttribute("announcement", announcement);
-        return "admin/editannouncement";
+        return "osa/editannouncement";
     }
 
     // Process edit form submission
@@ -56,12 +56,12 @@ public class AdminAnnouncementController {
                                      BindingResult result,
                                      RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "admin/editannouncement";
+            return "osa/editannouncement";
         }
         announcement.setId(id);
         announcementService.saveAnnouncement(announcement);
         redirectAttributes.addFlashAttribute("successMessage", "Announcement updated successfully!");
-        return "redirect:/admin/dashboard";
+        return "redirect:/osa/dashboard";
     }
 
     // Delete announcement
@@ -69,6 +69,6 @@ public class AdminAnnouncementController {
     public String deleteAnnouncement(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         announcementService.deleteAnnouncement(id);
         redirectAttributes.addFlashAttribute("successMessage", "Announcement deleted successfully!");
-        return "redirect:/admin/dashboard";
+        return "redirect:/osa/dashboard";
     }
 }

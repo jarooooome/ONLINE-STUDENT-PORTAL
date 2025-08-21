@@ -16,14 +16,12 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder encoder;
-    private final ActivityLogService activityLogService;
+
 
     public UserService(UserRepository userRepo,
-                       PasswordEncoder encoder,
-                       ActivityLogService activityLogService) {
+                       PasswordEncoder encoder) {
         this.userRepo = userRepo;
         this.encoder = encoder;
-        this.activityLogService = activityLogService;
     }
 
     /* ─────────────────────────── CREATE ─────────────────────────── */

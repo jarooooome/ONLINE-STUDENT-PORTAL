@@ -52,4 +52,5 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      * @return List of matching courses
      */
     List<Course> findByActiveAndNameContainingIgnoreCase(boolean active, String name);
+    long count();
 }

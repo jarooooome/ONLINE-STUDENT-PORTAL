@@ -33,7 +33,8 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 
-  <form th:action="@{/admin/addannouncement}" method="post">
+  <!-- Updated mapping to OSA -->
+  <form th:action="@{/osa/addannouncement}" method="post">
     <div class="mb-3">
       <label for="title" class="form-label">Announcement Title</label>
       <input type="text" class="form-control" id="title" name="title" placeholder="Enter announcement title" required />
@@ -43,7 +44,7 @@
       <textarea class="form-control" id="content" name="content" rows="6" placeholder="Enter announcement details" required></textarea>
     </div>
     <div class="d-flex justify-content-between">
-      <a href="/admin/dashboard" class="btn btn-secondary">
+      <a href="/osa/dashboard" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-1"></i> Cancel
       </a>
       <button type="submit" class="btn btn-primary">

@@ -90,6 +90,7 @@
             <option value="CASHIER">Cashier</option>
             <option value="REGISTRAR">Registrar</option>
             <option value="PROFESSOR">Professor</option>
+            <option value="OSA">OSA</option> <!-- NEW ROLE ADDED -->
           </select>
         </div>
 
@@ -209,7 +210,6 @@
             });
         }
 
-        // Validate Student ID uniqueness
         function validateStudentId() {
           const studentId = studentIdInput.value.trim();
           if (!studentId) return;

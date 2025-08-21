@@ -2,6 +2,7 @@ package com.example.studentportal.controller;
 
 import com.example.studentportal.model.User;
 import com.example.studentportal.model.Section;
+import com.example.studentportal.model.Course;
 import com.example.studentportal.service.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -29,18 +30,15 @@ public class AdminController {
 
     private final UserService userService;
     private final CourseService courseService;
-    private final ActivityLogService activityLogService;
     private final SectionService sectionService;
     private final AnnouncementService announcementService;
 
     public AdminController(UserService userService,
                            CourseService courseService,
-                           ActivityLogService activityLogService,
                            SectionService sectionService,
                            AnnouncementService announcementService) {
         this.userService = userService;
         this.courseService = courseService;
-        this.activityLogService = activityLogService;
         this.sectionService = sectionService;
         this.announcementService = announcementService;
     }
@@ -57,9 +55,6 @@ public class AdminController {
         model.addAttribute("userCount", userService.countUsers());
         model.addAttribute("studentCount", userService.countStudentsByActiveStatus(true));
         model.addAttribute("subjectCount", courseService.countActiveCourses());
-        model.addAttribute("pendingActions", activityLogService.countPendingActions());
-        model.addAttribute("recentActivities", activityLogService.getRecentActivities());
-
         model.addAttribute("announcement", new com.example.studentportal.model.Announcement());
         model.addAttribute("announcements", announcementService.getAllAnnouncements());
 
@@ -177,6 +172,55 @@ public class AdminController {
                 .toList();
         return ResponseEntity.ok(studentIds);
     }
+
+    /* ======================================================
+       COURSE MANAGEMENT ENDPOINTS
+     ====================================================== */
+
+    // Show all courses
+    @GetMapping("/courses")
+    public String manageCourses(Model model,
+                                Principal principal,
+                                HttpServletResponse response) throws IOException {
+        if (principal == null) {
+            response.sendRedirect("/auth/login");
+            return null;
+        }
+        setNoCacheHeaders(response);
+
+        List<Course> courses = courseService.getAllCourses();
+        model.addAttribute("courses", courses);
+        return "admin/courses"; // maps to courses.html
+    }
+
+    // Add a new course
+    @PostMapping("/courses/add")
+    public String addCourse(@ModelAttribute Course course,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            courseService.createCourse(course);
+            redirectAttributes.addFlashAttribute("successMessage", "Course added successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error adding course: " + e.getMessage());
+        }
+        return "redirect:/admin/courses";
+    }
+
+    // Edit existing course
+    @PostMapping("/courses/edit/{id}")
+    public String editCourse(@PathVariable Long id,
+                             @ModelAttribute Course course,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            courseService.updateCourse(id, course);
+            redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating course: " + e.getMessage());
+        }
+        return "redirect:/admin/courses";
+    }
+
+    /* ====================================================== */
 
     private void setNoCacheHeaders(HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");

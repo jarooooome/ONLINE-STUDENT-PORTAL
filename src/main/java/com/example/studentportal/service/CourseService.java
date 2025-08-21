@@ -82,4 +82,9 @@ public class CourseService {
     public long countActiveCourses() {
         return courseRepository.countByActiveTrue();
     }
+
+    // Count all courses (active + inactive)
+    public long countAllCourses() {
+        return courseRepository.count();
+    }
 }

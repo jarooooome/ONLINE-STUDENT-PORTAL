@@ -65,6 +65,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/student/**").hasAuthority("ROLE_STUDENT")
                         .requestMatchers("/cashier/**").hasAuthority("ROLE_CASHIER") // ✅ Added cashier role
+                        .requestMatchers("/registrar/**").hasAuthority("ROLE_REGISTRAR") // ✅ Added cashier role
+                        .requestMatchers("/professor/**").hasAuthority("ROLE_PROFESSOR") // ✅ Added cashier role
+                        .requestMatchers("/OSA/**").hasAuthority("ROLE_OSA") // ✅ Added cashier role
                         .requestMatchers("/dashboard").authenticated()
                         .anyRequest().authenticated()
                 )
