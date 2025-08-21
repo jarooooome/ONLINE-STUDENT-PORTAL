@@ -56,6 +56,58 @@
         .export-btn-group {
             margin-bottom: 20px;
         }
+
+        .filter-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        #studentSearch {
+            transition: all 0.3s ease;
+        }
+
+        #studentSearch:focus {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            border-color: #80bdff;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+            display: none;
+        }
+
+        .filter-icon {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            color: #6c757d;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .highlight {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-radius: 3px;
+            padding: 1px 3px;
+        }
+
+        .search-section {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -92,6 +144,22 @@
                 <button id="exportPdfBtn" class="btn btn-danger">
                     <i class="fas fa-file-pdf me-2"></i>Export to PDF
                 </button>
+            </div>
+
+            <!-- Search Filter -->
+            <div class="filter-container">
+                <div class="row">
+                    <div class="col-md-8">
+                        <label class="filter-label">Search Students</label>
+                        <div class="input-group">
+                            <input type="text" id="studentSearch" class="form-control" placeholder="Search by ID, name, email, course, section, or status...">
+                            <span class="filter-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                        </div>
+                        <small class="form-text text-muted">Students will be filtered as you type</small>
+                    </div>
+                </div>
             </div>
 
             <!-- Filter Form -->
@@ -154,21 +222,25 @@
                     </thead>
                     <tbody>
                     <tr th:each="student : ${students}">
-                        <td th:text="${student.id}">1</td>
-                        <td th:text="${student.studentId}">STU-001</td>
-                        <td th:text="${student.firstName + ' ' + student.lastName}">Juan Dela Cruz</td>
-                        <td th:text="${student.email}">juan@example.com</td>
-                        <td th:text="${student.course != null ? student.course.name : 'Not assigned'}">BSA</td>
-                        <td th:text="${student.yearLevel != null ? 'Year ' + student.yearLevel : 'Not assigned'}">1</td>
-                        <td th:text="${student.section != null ? student.section.course.code + '-' + student.section.yearLevel + student.section.name : 'Not assigned'}"></td>
-                        <td th:text="${student.enrollmentDate != null ? #temporals.format(student.enrollmentDate, 'yyyy-MM-dd') : 'Not enrolled'}">2025-06-01</td>
-                        <td th:text="${student.active ? 'Active' : 'Inactive'}">Active</td>
+                        <td class="student-id" th:text="${student.id}">1</td>
+                        <td class="student-number" th:text="${student.studentId}">STU-001</td>
+                        <td class="student-name" th:text="${student.firstName + ' ' + student.lastName}">Juan Dela Cruz</td>
+                        <td class="student-email" th:text="${student.email}">juan@example.com</td>
+                        <td class="student-course" th:text="${student.course != null ? student.course.name : 'Not assigned'}">BSA</td>
+                        <td class="student-year" th:text="${student.yearLevel != null ? 'Year ' + student.yearLevel : 'Not assigned'}">1</td>
+                        <td class="student-section" th:text="${student.section != null ? student.section.course.code + '-' + student.section.yearLevel + student.section.name : 'Not assigned'}"></td>
+                        <td class="student-enrollment" th:text="${student.enrollmentDate != null ? #temporals.format(student.enrollmentDate, 'yyyy-MM-dd') : 'Not enrolled'}">2025-06-01</td>
+                        <td class="student-status" th:text="${student.active ? 'Active' : 'Inactive'}">Active</td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(students)}">
                         <td colspan="9" class="text-center text-muted">No student records found.</td>
                     </tr>
                     </tbody>
                 </table>
+                <div id="noResults" class="no-results">
+                    <i class="fas fa-search fa-2x mb-2"></i>
+                    <p>No students match your search criteria.</p>
+                </div>
             </div>
         </main>
     </div>
@@ -186,6 +258,10 @@
         const yearLevelFilter = document.getElementById('yearLevelFilter');
         const sectionFilter = document.getElementById('sectionFilter');
         const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const studentSearch = document.getElementById('studentSearch');
+        const studentTable = document.getElementById('studentTable');
+        const noResults = document.getElementById('noResults');
+        const tableRows = studentTable.querySelectorAll('tbody tr');
 
         // Store all original section options
         const allSectionOptions = Array.from(sectionFilter.querySelectorAll('option[data-course-id]'));
@@ -229,41 +305,48 @@
             const courseName = courseFilter.options[courseFilter.selectedIndex].text;
             const yearLevel = yearLevelFilter.options[yearLevelFilter.selectedIndex].text;
             const sectionName = sectionFilter.options[sectionFilter.selectedIndex].text;
+            const searchTerm = studentSearch.value;
 
             // Create title
             let title = 'Student Records Report\n';
             if (courseName !== 'All Courses') title += `Course: ${courseName}\n`;
             if (yearLevel !== 'All Year Levels') title += `Year Level: ${yearLevel}\n`;
             if (sectionName !== 'All Sections') title += `Section: ${sectionName}\n`;
+            if (searchTerm) title += `Search: ${searchTerm}\n`;
 
             // Add title to PDF
             doc.setFontSize(16);
             doc.text(title, 14, 15);
 
-            // Prepare table data
-            const table = document.getElementById('studentTable');
+            // Prepare table data - only include visible rows
             const headers = [];
             const rows = [];
 
             // Get headers
-            table.querySelectorAll('thead th').forEach(th => {
+            studentTable.querySelectorAll('thead th').forEach(th => {
                 headers.push(th.textContent);
             });
 
-            // Get rows data
-            table.querySelectorAll('tbody tr').forEach(tr => {
-                const row = [];
-                tr.querySelectorAll('td').forEach(td => {
-                    row.push(td.textContent);
-                });
-                rows.push(row);
+            // Get rows data from visible rows only
+            studentTable.querySelectorAll('tbody tr').forEach(tr => {
+                if (tr.style.display !== 'none') {
+                    const row = [];
+                    tr.querySelectorAll('td').forEach(td => {
+                        // Remove highlight spans before getting text
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = td.innerHTML;
+                        const text = tempDiv.textContent || tempDiv.innerText || '';
+                        row.push(text);
+                    });
+                    rows.push(row);
+                }
             });
 
             // Add table to PDF
             doc.autoTable({
                 head: [headers],
                 body: rows,
-                startY: 40,
+                startY: 50,
                 theme: 'grid',
                 headStyles: {
                     fillColor: [41, 128, 185],
@@ -273,7 +356,7 @@
                 alternateRowStyles: {
                     fillColor: [245, 245, 245]
                 },
-                margin: { top: 40 }
+                margin: { top: 50 }
             });
 
             // Save the PDF
@@ -281,9 +364,90 @@
             doc.save(fileName);
         }
 
+        // Function to filter students based on search input
+        function filterStudents() {
+            const filterValue = studentSearch.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                // Skip the "no students" row that might be shown by Thymeleaf
+                if (row.querySelector('td.text-center')) {
+                    row.style.display = 'none';
+                    return;
+                }
+
+                // Get text content from all relevant cells
+                const idText = row.querySelector('.student-id')?.textContent.toLowerCase() || '';
+                const studentIdText = row.querySelector('.student-number')?.textContent.toLowerCase() || '';
+                const nameText = row.querySelector('.student-name')?.textContent.toLowerCase() || '';
+                const emailText = row.querySelector('.student-email')?.textContent.toLowerCase() || '';
+                const courseText = row.querySelector('.student-course')?.textContent.toLowerCase() || '';
+                const yearText = row.querySelector('.student-year')?.textContent.toLowerCase() || '';
+                const sectionText = row.querySelector('.student-section')?.textContent.toLowerCase() || '';
+                const enrollmentText = row.querySelector('.student-enrollment')?.textContent.toLowerCase() || '';
+                const statusText = row.querySelector('.student-status')?.textContent.toLowerCase() || '';
+
+                // Combine all text for searching
+                const allText = idText + ' ' + studentIdText + ' ' + nameText + ' ' + emailText + ' ' +
+                                courseText + ' ' + yearText + ' ' + sectionText + ' ' + enrollmentText + ' ' + statusText;
+
+                if (filterValue === '' || allText.includes(filterValue)) {
+                    row.style.display = '';
+                    visibleCount++;
+
+                    // Highlight matching text if filter is active
+                    if (filterValue !== '') {
+                        highlightMatchingText(row, filterValue);
+                    } else {
+                        removeHighlights(row);
+                    }
+                } else {
+                    row.style.display = 'none';
+                    removeHighlights(row);
+                }
+            });
+
+            // Show/hide the no results message
+            if (visibleCount === 0 && filterValue !== '') {
+                noResults.style.display = 'block';
+                studentTable.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                studentTable.style.display = 'table';
+            }
+        }
+
+        function highlightMatchingText(row, searchText) {
+            const cells = row.querySelectorAll('td');
+
+            cells.forEach(cell => {
+                const originalText = cell.textContent;
+                const regex = new RegExp(`(${searchText})`, 'gi');
+                const highlightedText = originalText.replace(regex, '<span class="highlight">$1</span>');
+
+                // Only update if there's a match to avoid unnecessary DOM manipulation
+                if (highlightedText !== originalText) {
+                    cell.innerHTML = highlightedText;
+                }
+            });
+        }
+
+        function removeHighlights(row) {
+            const cells = row.querySelectorAll('td');
+
+            cells.forEach(cell => {
+                if (cell.querySelector('.highlight')) {
+                    cell.innerHTML = cell.textContent; // This removes any HTML tags including highlights
+                }
+            });
+        }
+
         // Event listeners for course and year level changes
         courseFilter.addEventListener('change', updateSections);
         yearLevelFilter.addEventListener('change', updateSections);
+
+        // Event listener for search input
+        studentSearch.addEventListener('input', filterStudents);
 
         // Event listener for PDF export
         exportPdfBtn.addEventListener('click', exportToPDF);

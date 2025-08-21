@@ -177,9 +177,10 @@ public class AdminController {
        COURSE MANAGEMENT ENDPOINTS
      ====================================================== */
 
-    // Show all courses
+    // Show all courses (with optional filter)
     @GetMapping("/courses")
-    public String manageCourses(Model model,
+    public String manageCourses(@RequestParam(name = "status", defaultValue = "all") String status,
+                                Model model,
                                 Principal principal,
                                 HttpServletResponse response) throws IOException {
         if (principal == null) {
@@ -188,9 +189,22 @@ public class AdminController {
         }
         setNoCacheHeaders(response);
 
-        List<Course> courses = courseService.getAllCourses();
+        List<Course> courses;
+        switch (status) {
+            case "active":
+                courses = courseService.getActiveCourses();
+                break;
+            case "inactive":
+                courses = courseService.getInactiveCourses();
+                break;
+            case "all":
+            default:
+                courses = courseService.getAllCourses();
+                break;
+        }
         model.addAttribute("courses", courses);
-        return "admin/courses"; // maps to courses.html
+        model.addAttribute("status", status); // This is crucial for the dropdown selection
+        return "admin/courses";
     }
 
     // Add a new course
@@ -216,6 +230,30 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating course: " + e.getMessage());
+        }
+        return "redirect:/admin/courses";
+    }
+
+    // Deactivate course
+    @PostMapping("/courses/deactivate/{id}")
+    public String deactivateCourse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            courseService.deactivateCourse(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Course deactivated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deactivating course: " + e.getMessage());
+        }
+        return "redirect:/admin/courses";
+    }
+
+    // Activate course
+    @PostMapping("/courses/activate/{id}")
+    public String activateCourse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            courseService.activateCourse(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Course activated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error activating course: " + e.getMessage());
         }
         return "redirect:/admin/courses";
     }

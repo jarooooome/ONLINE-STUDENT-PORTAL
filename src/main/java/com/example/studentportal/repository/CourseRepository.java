@@ -17,6 +17,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      * @return List of active courses
      */
     List<Course> findByActiveTrue();
+    List<Course> findByActiveFalse();
 
     /**
      * Finds course by course code (e.g. "BSIT")
@@ -30,6 +31,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
      * @return Number of active courses
      */
     long countByActiveTrue();
+
 
     /**
      * Finds courses containing search term in name or code (case-insensitive)
