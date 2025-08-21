@@ -1,10 +1,8 @@
 package com.example.studentportal.controller;
 
 import com.example.studentportal.model.Subject;
-import com.example.studentportal.model.Schedule;
 import com.example.studentportal.model.Course;
 import com.example.studentportal.repository.SubjectRepository;
-import com.example.studentportal.repository.ScheduleRepository;
 import com.example.studentportal.repository.CourseRepository;
 import com.example.studentportal.dto.SubjectDTO;
 
@@ -25,19 +23,13 @@ public class SubjectController {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private ScheduleRepository scheduleRepository;
-
-    @Autowired
     private CourseRepository courseRepository;
 
-    // Show all subjects and their schedules
+    // Show all subjects
     @GetMapping("/subjects")
     public String viewSubjects(Model model) {
         List<Subject> subjects = subjectRepository.findAll();
-        List<Schedule> schedules = scheduleRepository.findAll(); // Fetch all schedules
-
         model.addAttribute("subjects", subjects);
-        model.addAttribute("schedules", schedules); // Add schedules to the model
         return "admin/subjects";
     }
 
@@ -69,7 +61,7 @@ public class SubjectController {
         return "redirect:/admin/subjects";
     }
 
-    // Show form to edit a subject (UPDATED)
+    // Show form to edit a subject
     @GetMapping("/subjects/edit/{id}")
     public String showEditSubjectForm(@PathVariable("id") Long id, Model model) {
         Subject subject = subjectRepository.findById(id).orElse(null);
@@ -77,7 +69,7 @@ public class SubjectController {
 
         model.addAttribute("subject", subject);
         model.addAttribute("courses", courseRepository.findAll());
-        model.addAttribute("existingSubjects", subjectRepository.findAll()); // <-- added
+        model.addAttribute("existingSubjects", subjectRepository.findAll());
         return "admin/editsubject";
     }
 
@@ -95,37 +87,13 @@ public class SubjectController {
         return "redirect:/admin/subjects";
     }
 
-    // Show form to add a schedule for a specific subject
-    @GetMapping("/subjects/{subjectId}/schedule/add")
-    public String showAddScheduleForm(@PathVariable Long subjectId, Model model) {
-        Subject subject = subjectRepository.findById(subjectId).orElse(null);
-        if (subject == null) return "redirect:/admin/subjects";
-
-        Schedule schedule = new Schedule();
-        schedule.setSubject(subject);
-        model.addAttribute("schedule", schedule);
-        return "admin/addschedule";
-    }
-
-    // Save the new schedule
-    @PostMapping("/subjects/{subjectId}/schedule/save")
-    public String saveSchedule(@PathVariable Long subjectId, @ModelAttribute Schedule schedule) {
-        Subject subject = subjectRepository.findById(subjectId).orElse(null);
-        if (subject == null) return "redirect:/admin/subjects";
-
-        schedule.setSubject(subject);
-        scheduleRepository.save(schedule);
-        return "redirect:/admin/subjects";
-    }
-
-    // Required by addschedule.html to load subjects by courseId using DTOs
+    // Load subjects by courseId using DTOs
     @GetMapping("/subjects/by-course")
     @ResponseBody
     public List<SubjectDTO> getSubjectsByCourse(@RequestParam Long courseId) {
         List<Subject> subjects = subjectRepository.findByCourseId(courseId);
         if (subjects == null) return List.of();
 
-        // Map to DTO to avoid JSON recursion
         return subjects.stream()
                 .map(s -> new SubjectDTO(
                         s.getId(),

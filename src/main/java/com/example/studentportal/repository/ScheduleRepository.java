@@ -10,3 +10,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     // ✅ Added: Find schedules by section
     List<Schedule> findBySection(Section section);
 }
+

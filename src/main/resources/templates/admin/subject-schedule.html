@@ -2,7 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Subjects & Schedules Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -44,61 +48,23 @@
             margin-top: auto;
         }
 
+        .card {
+            border-radius: 15px;
+            transition: transform 0.2s;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
         .hub-container {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .hub-card {
-            width: 300px;
-            height: 300px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .hub-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .hub-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            color: #0d6efd;
-        }
-
-        .hub-card-subjects .hub-icon {
-            color: #0d6efd;
-        }
-
-        .hub-card-schedules .hub-icon {
-            color: #198754;
-        }
-
-        .hub-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .hub-description {
-            color: #6c757d;
-            line-height: 1.5;
+            padding: 2rem 0;
         }
 
         .welcome-header {
@@ -138,7 +104,7 @@
             <a href="/admin/users"><i class="fas fa-users me-2"></i>Manage Users</a>
             <a href="/admin/students"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
             <a href="/admin/courses"><i class="fas fa-graduation-cap me-2"></i>Courses</a>
-            <a href="/admin/subjects-schedules" class="active"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
+            <a href="/admin/subject-schedule" class="active"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
             <a href="/admin/grades"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
             <a href="/admin/calendar"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
 
@@ -157,30 +123,28 @@
             </div>
 
             <!-- Hub Cards -->
-            <div class="hub-container">
-                <a href="/admin/subjects" class="hub-card hub-card-subjects">
-                    <div class="hub-icon">
-                        <i class="fas fa-book-open"></i>
+            <div class="row hub-container">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow text-center p-4">
+                        <i class="fas fa-book-open text-primary"></i>
+                        <h3>Manage Subjects</h3>
+                        <p class="mb-3">View, add, and edit subjects offered in courses. Define course codes, descriptions, and assign them to specific programs.</p>
+                        <a th:href="@{/admin/subjects}" class="btn btn-primary">Go to Subjects</a>
                     </div>
-                    <h3 class="hub-title">Manage Subjects</h3>
-                    <p class="hub-description">
-                        Create, edit, and manage all academic subjects. Define course codes, descriptions, and assign them to specific courses.
-                    </p>
-                </a>
+                </div>
 
-                <a href="/admin/schedules" class="hub-card hub-card-schedules">
-                    <div class="hub-icon">
-                        <i class="fas fa-calendar-alt"></i>
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow text-center p-4">
+                        <i class="fas fa-calendar-alt text-success"></i>
+                        <h3>Manage Schedules</h3>
+                        <p class="mb-3">Set up and manage class schedules for each section. Assign professors, define time slots, and manage room allocations.</p>
+                        <a th:href="@{/admin/schedules}" class="btn btn-success">Go to Schedules</a>
                     </div>
-                    <h3 class="hub-title">Manage Schedules</h3>
-                    <p class="hub-description">
-                        Set up class schedules, assign professors, define time slots, and manage room allocations for all courses.
-                    </p>
-                </a>
+                </div>
             </div>
 
             <!-- Quick Stats -->
-            <div class="row mt-5">
+            <div class="row mt-4">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header bg-primary text-white">
@@ -195,7 +159,7 @@
                                 <li>Define semester offerings</li>
                                 <li>Manage subject prerequisites</li>
                             </ul>
-                            <a href="/admin/subjects" class="btn btn-primary mt-2">Go to Subjects</a>
+                            <a th:href="@{/admin/subjects}" class="btn btn-primary mt-2">Go to Subjects</a>
                         </div>
                     </div>
                 </div>
@@ -214,7 +178,7 @@
                                 <li>Manage room assignments</li>
                                 <li>Handle scheduling conflicts</li>
                             </ul>
-                            <a href="/admin/schedules" class="btn btn-success mt-2">Go to Schedules</a>
+                            <a th:href="@{/admin/schedules}" class="btn btn-success mt-2">Go to Schedules</a>
                         </div>
                     </div>
                 </div>

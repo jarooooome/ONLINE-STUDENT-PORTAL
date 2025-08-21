@@ -32,15 +32,25 @@ public class ScheduleController {
     @Autowired
     private SectionService sectionService;
 
+    // ✅ Landing Page for schedules
+    @GetMapping
+    public String schedulesHome(Model model) {
+        List<Schedule> schedules = scheduleService.getAllSchedules();
+        model.addAttribute("schedules", schedules);
+        return "admin/schedules";
+    }
+
+    // ✅ Show Add Schedule Form
     @GetMapping("/add")
     public String showAddScheduleForm(Model model) {
-        List<Subject> subjects = subjectService.getAllSubjects();
-        model.addAttribute("subjects", subjects);
+        model.addAttribute("subjects", subjectService.getAllSubjects());
         model.addAttribute("courses", courseService.getAllCourses());
+        model.addAttribute("sections", sectionService.findAllActiveSections());
         model.addAttribute("schedule", new Schedule());
         return "admin/addschedule";
     }
 
+    // ✅ Save Schedule
     @PostMapping("/save")
     public String saveSchedule(@ModelAttribute("schedule") Schedule schedule,
                                @RequestParam("subjectId") Long subjectId,
@@ -52,7 +62,7 @@ public class ScheduleController {
                                @RequestParam("endTime") String endTime,
                                RedirectAttributes redirectAttributes) {
         try {
-            // Validate
+            // Validate inputs
             if (subjectId == null) throw new IllegalArgumentException("Subject is required");
             if (professor == null || professor.trim().isEmpty()) throw new IllegalArgumentException("Professor is required");
             if (sectionId == null) throw new IllegalArgumentException("Section is required");
@@ -65,7 +75,7 @@ public class ScheduleController {
             if (subject == null) throw new IllegalArgumentException("Invalid subject ID");
             schedule.setSubject(subject);
 
-            // Set professor name
+            // Set professor
             schedule.setProfessor(professor.trim());
 
             // Set section
@@ -76,10 +86,8 @@ public class ScheduleController {
             // Set room
             schedule.setRoom(room);
 
-            // Clear existing schedule days if any
+            // Clear and add schedule days
             schedule.getScheduleDays().clear();
-
-            // Add multiple schedule days with same time for all selected days
             for (String day : days) {
                 ScheduleDay scheduleDay = new ScheduleDay();
                 scheduleDay.setDay(day);
@@ -92,8 +100,8 @@ public class ScheduleController {
             // Save
             scheduleService.saveSchedule(schedule);
 
-            redirectAttributes.addFlashAttribute("success", "Schedule saved successfully");
-            return "redirect:/admin/subjects";
+            redirectAttributes.addFlashAttribute("success", "Schedule saved successfully.");
+            return "redirect:/admin/schedules";
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
@@ -102,13 +110,15 @@ public class ScheduleController {
         }
     }
 
+    // ✅ List All Schedules
     @GetMapping("/list")
-    public String showAllSchedules(Model model) {
+    public String listSchedules(Model model) {
         List<Schedule> schedules = scheduleService.getAllSchedules();
         model.addAttribute("schedules", schedules);
         return "admin/schedules";
     }
 
+    // ✅ Delete Schedule
     @GetMapping("/delete/{id}")
     public String deleteSchedule(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -117,6 +127,6 @@ public class ScheduleController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete schedule: " + e.getMessage());
         }
-        return "redirect:/admin/subjects";
+        return "redirect:/admin/schedules";
     }
 }

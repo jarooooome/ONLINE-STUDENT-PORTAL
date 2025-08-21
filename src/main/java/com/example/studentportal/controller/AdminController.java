@@ -272,4 +272,9 @@ public class AdminController {
         Path path = Paths.get(filePath);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
     }
+
+    @GetMapping("/subject-schedule")
+    public String subjectSchedulePage() {
+        return "admin/subject-schedule";
+    }
 }
