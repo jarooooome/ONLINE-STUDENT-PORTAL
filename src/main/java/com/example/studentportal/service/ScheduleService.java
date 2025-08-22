@@ -2,6 +2,7 @@ package com.example.studentportal.service;
 
 import com.example.studentportal.model.Schedule;
 import com.example.studentportal.model.Section;
+import com.example.studentportal.model.User;
 import com.example.studentportal.repository.ScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,8 +45,40 @@ public class ScheduleService {
         scheduleRepository.deleteById(id);
     }
 
-    // ✅ Added: Find all schedules by section
+    // ✅ Find all schedules by section
     public List<Schedule> findBySection(Section section) {
         return scheduleRepository.findBySection(section);
+    }
+
+    // ✅ Find by professor name (for backward compatibility)
+    public List<Schedule> findByProfessor(String professorName) {
+        System.out.println("Searching for schedules for professor: " + professorName);
+        List<Schedule> schedules = scheduleRepository.findByProfessor(professorName);
+        System.out.println("Found " + schedules.size() + " schedules");
+        return schedules;
+    }
+
+    // ✅ NEW: Find by professor user ID
+    public List<Schedule> findByProfessorUserId(Long professorId) {
+        System.out.println("Searching for schedules for professor ID: " + professorId);
+        List<Schedule> schedules = scheduleRepository.findByProfessorUserId(professorId);
+        System.out.println("Found " + schedules.size() + " schedules by professor ID");
+        return schedules;
+    }
+
+    // ✅ NEW: Find by professor user entity
+    public List<Schedule> findByProfessorUser(User professorUser) {
+        System.out.println("Searching for schedules for professor: " + professorUser.getFullName());
+        List<Schedule> schedules = scheduleRepository.findByProfessorUser(professorUser);
+        System.out.println("Found " + schedules.size() + " schedules by professor entity");
+        return schedules;
+    }
+
+    // ✅ NEW: Find by professor containing (for partial matches)
+    public List<Schedule> findByProfessorContaining(String professorName) {
+        System.out.println("Searching for schedules containing professor: " + professorName);
+        List<Schedule> schedules = scheduleRepository.findByProfessorContaining(professorName);
+        System.out.println("Found " + schedules.size() + " schedules containing professor name");
+        return schedules;
     }
 }

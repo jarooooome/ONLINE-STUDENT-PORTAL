@@ -18,6 +18,7 @@ import java.util.Optional;
  *   <li>{@code countByRoleAndActive} – count only active/inactive users of a specific role</li>
  *   <li>{@code findAllByRole} – list all users of a given role</li>
  *   <li>{@code findAllWithSections} – list all users with their sections (eager loading)</li>
+ *   <li>{@code findByRole} – find users by role (alias for findAllByRole)</li>
  * </ul>
  */
 @Repository
@@ -38,6 +39,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /* ───────────── Collections ────────── */
 
     List<User> findAllByRole(String role);   // e.g. STUDENT or ADMIN
+
+    // Alias for findAllByRole - added for consistency
+    List<User> findByRole(String role);
 
     /* ───────────── Section Handling ────────── */
 

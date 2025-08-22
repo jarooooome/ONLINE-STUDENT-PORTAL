@@ -9,7 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
@@ -74,6 +76,11 @@ public class User {
     )
     @JsonManagedReference("user-courses")
     private List<Course> enrolledCourses;
+
+    /* ───────────── Transient field for custom data ───────────── */
+    @Transient
+    @JsonIgnore
+    private Map<String, Object> customFields = new HashMap<>();
 
     /* ───────────── Security helper ───────────── */
     @JsonIgnore

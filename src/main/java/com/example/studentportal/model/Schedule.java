@@ -26,6 +26,12 @@ public class Schedule {
     @JsonIgnore
     private Subject subject;
 
+    // ✅ New: Proper relationship with User entity
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "professor_id")
+    private User professorUser;
+
+    // ✅ Keep existing field for backward compatibility
     @Column(nullable = false)
     private String professor;
 
@@ -63,5 +69,28 @@ public class Schedule {
                     : "Not Scheduled";
         }
         return "Not Scheduled";
+    }
+
+    // ✅ Helper method to get professor name (for backward compatibility)
+    @Transient
+    public String getProfessorName() {
+        if (professorUser != null) {
+            return professorUser.getFirstName() + " " + professorUser.getLastName();
+        }
+        return professor; // Fallback to the string field
+    }
+
+    // ✅ Helper method to get professor ID
+    @Transient
+    public Long getProfessorId() {
+        if (professorUser != null) {
+            return professorUser.getId();
+        }
+        // Try to parse ID from the string field
+        try {
+            return Long.parseLong(professor);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

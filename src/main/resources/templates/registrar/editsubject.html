@@ -41,10 +41,11 @@
         <small th:text="'Logged in as: ' + ${#authentication.name}">registrar</small>
       </div>
 
-      <a href="/registrar/dashboard"><i class="fas fa-home me-2"></i>Dashboard</a>
-      <a href="/registrar/students"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
-      <a href="/registrar/subjects" class="active"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
-      <a href="#"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
+      <a href="/registrar/dashboard" class="nav-link">Dashboard</a>
+      <a href="/registrar/students" class="nav-link">Manage Students</a>
+      <a href="/registrar/subjects-schedules" class="nav-link">Subjects & Schedule</a>
+      <a href="/registrar/professors" class="nav-link">Professor Schedules</a>
+      <a href="/registrar/reports" class="nav-link">Reports</a>
 
       <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto px-3 py-2">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

@@ -17,7 +17,6 @@ public class UserService {
     private final UserRepository userRepo;
     private final PasswordEncoder encoder;
 
-
     public UserService(UserRepository userRepo,
                        PasswordEncoder encoder) {
         this.userRepo = userRepo;
@@ -99,6 +98,12 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<User> getAllStudents() {
         return userRepo.findAllByRole("STUDENT");
+    }
+
+    // <<< ADDED METHOD TO FETCH ALL PROFESSORS >>>
+    @Transactional(readOnly = true)
+    public List<User> getProfessors() {
+        return userRepo.findByRole("PROFESSOR");
     }
 
     /* ─────────────────────────── UPDATE / DELETE ─────────────────────────── */

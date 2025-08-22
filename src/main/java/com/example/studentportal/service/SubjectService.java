@@ -69,4 +69,8 @@ public class SubjectService {
     public List<Subject> getSubjectsByCourse(Course course) {
         return subjectRepository.findByCourse(course);
     }
+
+    public List<Subject> getSubjectsByCourseId(Long courseId) {
+        return subjectRepository.findByCourseId(courseId);
+    }
 }

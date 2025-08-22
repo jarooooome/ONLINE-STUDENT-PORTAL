@@ -46,4 +46,5 @@ public class SubjectDTO {
     public void setSemester(String semester) {
         this.semester = semester;
     }
+
 }
