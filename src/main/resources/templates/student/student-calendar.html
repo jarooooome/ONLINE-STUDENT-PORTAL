@@ -110,11 +110,14 @@
       <a href="/student/profile" class="nav-link">
         <i class="fas fa-user me-2"></i>Account/Profile
       </a>
-      <a href="/student/grades" class="nav-link">
+      <a th:href="@{/student/grades}" class="nav-link">
         <i class="fas fa-chart-bar me-2"></i>Grades Viewer
       </a>
       <a href="/student/schedule" class="nav-link">
         <i class="fas fa-calendar me-2"></i>Class Schedule
+      </a>
+      <a href="/student/classes" class="nav-link">
+        <i class="fas fa-book me-2"></i>My Classes
       </a>
       <a href="/student/tuition-balance"
          class="nav-link [[${#httpServletRequest.requestURI == '/student/tuition'} ? 'active' : '']]">

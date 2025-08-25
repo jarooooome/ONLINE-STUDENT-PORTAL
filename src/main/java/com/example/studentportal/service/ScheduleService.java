@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,11 @@ public class ScheduleService {
 
     public Schedule getScheduleById(Long id) {
         return scheduleRepository.findById(id).orElse(null);
+    }
+
+    // ✅ NEW: Get schedule by ID as Optional
+    public Optional<Schedule> getScheduleByIdOptional(Long id) {
+        return scheduleRepository.findById(id);
     }
 
     @Transactional

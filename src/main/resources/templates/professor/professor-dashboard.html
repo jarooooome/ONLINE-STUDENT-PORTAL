@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Professor Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
     .sidebar {
       height: 100vh;
@@ -25,6 +27,10 @@
     .sidebar a:hover, .logout-form button:hover {
       background-color: #495057;
     }
+    .sidebar a.active {
+      background-color: #495057;
+      font-weight: bold;
+    }
     .logout-form {
       margin-top: auto;
       padding: 0.75rem 1rem;
@@ -40,10 +46,9 @@
         <h4>Professor Panel</h4>
         <p th:text="'Logged in as: ' + ${#authentication.name}">professor</p>
       </div>
-      <a href="/professor/dashboard" class="nav-link">Dashboard</a>
-      <a href="/professor/classes" class="nav-link">My Classes</a>
-      <a href="/professor/grades" class="nav-link">Submit Grades</a>
-      <a href="/professor/schedule" class="nav-link">Class Schedule</a>
+      <a href="/professor/dashboard" class="nav-link active"><i class="fas fa-home me-2"></i>Dashboard</a>
+      <a href="/professor/schedules" class="nav-link"><i class="fas fa-calendar-alt me-2"></i>My Classes and Schedules</a>
+      <a href="/professor/grades" class="nav-link"><i class="fas fa-chart-line me-2"></i>Submit Grades</a>
       <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
         <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
       </form>
@@ -59,24 +64,51 @@
         <div class="col-md-4">
           <div class="card text-white bg-primary mb-3">
             <div class="card-body">
-              <h5 class="card-title">Classes Today</h5>
-              <p class="card-text" th:text="${todayClassesCount}">0</p>
+              <h5 class="card-title"><i class="fas fa-calendar-day me-2"></i>Classes Today</h5>
+              <p class="card-text display-6" th:text="${todayClassesCount != null ? todayClassesCount : 0}">0</p>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card text-white bg-success mb-3">
             <div class="card-body">
-              <h5 class="card-title">Pending Grades</h5>
-              <p class="card-text" th:text="${pendingGradesCount}">0</p>
+              <h5 class="card-title"><i class="fas fa-tasks me-2"></i>Pending Grades</h5>
+              <p class="card-text display-6" th:text="${pendingGradesCount != null ? pendingGradesCount : 0}">0</p>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card text-white bg-warning mb-3">
             <div class="card-body">
-              <h5 class="card-title">Notifications</h5>
-              <p class="card-text" th:text="${notificationsCount}">0</p>
+              <h5 class="card-title"><i class="fas fa-bell me-2"></i>Notifications</h5>
+              <p class="card-text display-6" th:text="${notificationsCount != null ? notificationsCount : 0}">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2 d-md-flex">
+                <a href="/professor/schedules" class="btn btn-primary me-2">
+                  <i class="fas fa-calendar-alt me-1"></i>View My Schedules
+                </a>
+                <a href="/professor/grades" class="btn btn-success me-2">
+                  <i class="fas fa-edit me-1"></i>Submit Grades
+                </a>
+                <a href="/professor/attendance" class="btn btn-info me-2">
+                  <i class="fas fa-clipboard-list me-1"></i>Take Attendance
+                </a>
+                <a href="/professor/students" class="btn btn-secondary">
+                  <i class="fas fa-users me-1"></i>View Students
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -84,5 +116,7 @@
     </main>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

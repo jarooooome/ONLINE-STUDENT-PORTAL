@@ -33,12 +33,6 @@ public class RegistrarController {
         return "registrar/registrar-dashboard"; // updated path to subfolder
     }
 
-    @GetMapping("/students")
-    public String manageStudents(Model model) {
-        // TODO: Add logic to list/manage students
-        return "registrar/registrar-students"; // updated path
-    }
-
     @GetMapping("/enrollments")
     public String enrollments(Model model) {
         // TODO: Add logic for student enrollments

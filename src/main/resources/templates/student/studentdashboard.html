@@ -206,15 +206,17 @@
             <a href="/student/schedule" class="nav-link">
                 <i class="fas fa-calendar me-2"></i>Class Schedule
             </a>
+            <a href="/student/classes" class="nav-link">
+                <i class="fas fa-book me-2"></i>My Classes
+            </a>
             <a href="/student/tuition-balance"
                class="nav-link [[${#httpServletRequest.requestURI == '/student/tuition'} ? 'active' : '']]">
                 <i class="fas fa-dollar-sign me-2"></i>Tuition Balance
             </a>
-
-            <!-- Updated Academic Calendar link -->
             <a href="/student/calendar" class="nav-link">
                 <i class="fas fa-calendar-day me-2"></i>Academic Calendar
             </a>
+
 
             <!-- Logout Button -->
             <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">

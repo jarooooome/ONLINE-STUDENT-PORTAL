@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -26,7 +28,7 @@ public class Schedule {
     @JsonIgnore
     private Subject subject;
 
-    // ✅ New: Proper relationship with User entity
+    // ✅ Proper relationship with User entity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "professor_id")
     private User professorUser;
@@ -40,6 +42,11 @@ public class Schedule {
 
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScheduleDay> scheduleDays = new ArrayList<>();
+
+    // ✅ Transient field for custom data
+    @Transient
+    @JsonIgnore
+    private Map<String, Object> customFields = new HashMap<>();
 
     // Helper method to properly add schedule days
     public void addScheduleDay(String day, String startTime, String endTime) {
@@ -57,6 +64,19 @@ public class Schedule {
             scheduleDays = new ArrayList<>();
         }
         return scheduleDays;
+    }
+
+    // Getter for customFields
+    public Map<String, Object> getCustomFields() {
+        if (customFields == null) {
+            customFields = new HashMap<>();
+        }
+        return customFields;
+    }
+
+    // Setter for customFields
+    public void setCustomFields(Map<String, Object> customFields) {
+        this.customFields = customFields;
     }
 
     // Transient method to display time

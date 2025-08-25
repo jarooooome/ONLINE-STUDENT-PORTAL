@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Classes - Student Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS and Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4e73df;
+            --primary-dark: #224abe;
+            --light: #f8f9fc;
+            --dark-bg: #2c2f33;
+            --dark-text: #f0f0f0;
+            --success: #1cc88a;
+            --info: #36b9cc;
+        }
+
+        body {
+            background-color: var(--light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 1rem;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        .logout-form {
+            margin: auto 1rem 1rem 1rem;
+        }
+
+        .logout-form button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .logout-form button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .welcome-header {
+            background-color: white;
+            border-radius: 0.35rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .welcome-header {
+            background-color: #3c3f44;
+            color: var(--dark-text);
+        }
+
+        .clock {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-dark);
+            text-align: right;
+        }
+
+        .dark-mode .clock {
+            color: #ccc;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 1rem 1.35rem;
+            font-weight: 600;
+        }
+
+        body.dark-mode .card, body.dark-mode .card-header {
+            background-color: #444;
+            color: var(--dark-text);
+        }
+
+        .class-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border-left: 4px solid var(--primary);
+        }
+
+        .class-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.2);
+        }
+
+        .schedule-badge {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .room-badge {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .file-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .file-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        body.dark-mode .file-item {
+            border-bottom: 1px solid #555;
+        }
+
+        body.dark-mode .file-item:hover {
+            background-color: #3c3f44;
+        }
+
+        .file-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+        }
+
+        .dark-toggle {
+            margin-left: 1rem;
+            cursor: pointer;
+            font-size: 1.3rem;
+        }
+
+        .dark-toggle:hover {
+            color: var(--primary-dark);
+        }
+
+        .professor-info {
+            background-color: rgba(78, 115, 223, 0.05);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        body.dark-mode .professor-info {
+            background-color: rgba(78, 115, 223, 0.15);
+        }
+
+        .uploaded-files-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 sidebar d-flex flex-column py-4">
+            <div class="text-white ps-4 mb-3 fs-5 fw-bold">Student Portal</div>
+            <a href="/student/dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+            <a href="/student/profile" class="nav-link">
+                <i class="fas fa-user me-2"></i>Account/Profile
+            </a>
+            <a th:href="@{/student/grades}" class="nav-link">
+                <i class="fas fa-chart-bar me-2"></i>Grades Viewer
+            </a>
+            <a href="/student/schedule" class="nav-link">
+                <i class="fas fa-calendar me-2"></i>Class Schedule
+            </a>
+            <a href="/student/classes active" class="nav-link">
+                <i class="fas fa-book me-2"></i>My Classes
+            </a>
+            <a href="/student/tuition-balance"
+               class="nav-link [[${#httpServletRequest.requestURI == '/student/tuition'} ? 'active' : '']]">
+                <i class="fas fa-dollar-sign me-2"></i>Tuition Balance
+            </a>
+            <a href="/student/calendar" class="nav-link">
+                <i class="fas fa-calendar-day me-2"></i>Academic Calendar
+            </a>
+
+            <!-- Logout Button -->
+            <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
+                <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+            </form>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 p-4">
+            <div class="welcome-header">
+                <div>
+                    <h4>My Classes - <span class="text-primary fw-bold" th:text="${student.firstName + ' ' + student.lastName}">Student Name</span></h4>
+                    <p><i class="fas fa-graduation-cap me-2"></i>Section: <span th:text="${student.section.name}">Section Name</span></p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="clock" id="realTimeClock">Loading time...</div>
+                    <i class="fas fa-moon dark-toggle ms-3" id="darkToggle" title="Toggle dark mode"></i>
+                </div>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Class List View -->
+            <div th:if="${selectedClass == null}">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-book me-2 text-primary"></i>My Classes</h3>
+                    <span class="badge bg-primary fs-6" th:text="'Total: ' + ${classes != null ? classes.size() : 0}"></span>
+                </div>
+
+                <div class="row" id="classesContainer">
+                    <!-- Class Cards -->
+                    <div th:each="classItem : ${classes}" class="col-md-6 col-lg-4 mb-4">
+                        <div class="card class-card h-100" th:onclick="|viewClassDetails('${classItem.id}')|">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="card-title text-primary" th:text="${classItem.subject?.code}">SUBJ101</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted" th:text="${classItem.subject?.name}">Subject Name</h6>
+                                    </div>
+                                    <span class="badge bg-success" th:text="${classItem.section.name}">Section</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <p class="mb-1"><i class="fas fa-user-tie me-2 text-info"></i>
+                                        <span th:text="${classItem.professorUser != null ? classItem.professorUser.fullName : 'Professor TBA'}">Professor Name</span>
+                                    </p>
+                                    <p class="mb-1"><i class="fas fa-door-open me-2 text-success"></i>
+                                        <span th:text="${classItem.room != null ? 'Room: ' + classItem.room : 'Room TBA'}">Room 101</span>
+                                    </p>
+                                </div>
+
+                                <!-- Schedule Details -->
+                                <div class="mb-3">
+                                    <span th:if="${classItem.scheduleDays != null}"
+                                          th:each="daySchedule : ${classItem.scheduleDays}"
+                                          class="badge bg-light text-dark me-1 mb-1"
+                                          th:text="${daySchedule.day}">Day</span>
+                                    <span class="badge schedule-badge me-1 mb-1" th:if="${classItem.scheduleDays != null and !classItem.scheduleDays.empty}"
+                                          th:text="${classItem.scheduleDays[0].startTime + ' - ' + classItem.scheduleDays[0].endTime}">
+                                        Time
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Click to view details</small>
+                                    <i class="fas fa-chevron-right text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Classes Message -->
+                    <div th:if="${classes == null or classes.empty}" class="col-12">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-book-open fa-3x mb-3"></i>
+                            <h4>No Classes Found</h4>
+                            <p>You don't have any classes assigned to your section yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Detail View -->
+            <div th:if="${selectedClass != null}">
+                <button class="btn btn-outline-primary back-button" onclick="history.back()">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Classes
+                </button>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-book me-2 text-primary"></i>Class Details</h3>
+                    <span class="badge bg-success fs-6" th:text="${selectedClass.section.name}">Section</span>
+                </div>
+
+                <div class="row">
+                    <!-- Class Information -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-info-circle me-2"></i>Class Information
+                            </div>
+                            <div class="card-body">
+                                <h4 class="text-primary" th:text="${selectedClass.subject?.code + ' - ' + selectedClass.subject?.name}">SUBJ101 - Subject Name</h4>
+
+                                <div class="professor-info mt-4">
+                                    <h5><i class="fas fa-user-tie me-2"></i>Professor</h5>
+                                    <p class="mb-1 fs-5" th:text="${selectedClass.professorUser != null ? selectedClass.professorUser.fullName : 'Professor TBA'}">Professor Name</p>
+                                    <p class="text-muted mb-0" th:if="${selectedClass.professorUser != null and selectedClass.professorUser.email != null}"
+                                       th:text="${'Email: ' + selectedClass.professorUser.email}">professor@example.com</p>
+                                </div>
+
+                                <div class="mt-4">
+                                    <h5><i class="fas fa-door-open me-2"></i>Classroom</h5>
+                                    <p th:text="${selectedClass.room != null ? selectedClass.room : 'Room TBA'}">Room 101</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Information -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-calendar-alt me-2"></i>Class Schedule
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${selectedClass.scheduleDays != null and !selectedClass.scheduleDays.empty}">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th>Day</th>
+                                                <th>Time</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="schedule : ${selectedClass.scheduleDays}">
+                                                <td th:text="${schedule.day}">Monday</td>
+                                                <td th:text="${schedule.startTime + ' - ' + schedule.endTime}">8:00 AM - 9:30 AM</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div th:if="${selectedClass.scheduleDays == null or selectedClass.scheduleDays.empty}" class="text-center text-muted py-3">
+                                    <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                    <p>No schedule available for this class.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Uploaded Materials -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-file-download me-2"></i>Learning Materials
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${selectedClass.customFields.uploadedFiles != null and !selectedClass.customFields.uploadedFiles.empty}">
+                            <div class="uploaded-files-list">
+                                <div th:each="file : ${selectedClass.customFields.uploadedFiles}" class="file-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="file-icon">
+                                            <i th:class="${file.fileIconClass}"></i>
+                                        </div>
+                                        <div>
+                                            <a th:href="@{/student/download-material/{id}(id=${file.id})}"
+                                               th:text="${file.title} ?: ${file.originalFileName}"
+                                               class="fw-bold text-decoration-none">File Name</a>
+                                            <p class="text-muted mb-0 small" th:text="${file.description} ?: 'No description'">File description</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block" th:text="${#temporals.format(file.uploadDate, 'MMM dd, yyyy')}">Upload date</small>
+                                        <small class="text-muted" th:text="${'Size: ' + #numbers.formatDecimal(file.fileSize/1024, 1, 2) + ' KB'}">Size</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${selectedClass.customFields.uploadedFiles == null or selectedClass.customFields.uploadedFiles.empty}" class="text-center text-muted py-3">
+                            <i class="fas fa-file-upload fa-2x mb-2"></i>
+                            <p>No materials uploaded for this class yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Real-Time Clock Script -->
+<script>
+    function updateLocalTime() {
+        const now = new Date();
+        const hoursRaw = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hoursRaw >= 12 ? 'PM' : 'AM';
+        const hours = hoursRaw % 12 || 12;
+        const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'];
+        const day = days[now.getDay()];
+        const month = months[now.getMonth()];
+        const date = now.getDate();
+        const year = now.getFullYear();
+        const dateString = `${day}, ${month} ${date}, ${year}`;
+        const fullString = `${dateString} - ${timeString}`;
+        document.getElementById("realTimeClock").textContent = fullString;
+    }
+    updateLocalTime();
+    setInterval(updateLocalTime, 1000);
+</script>
+
+<!-- Dark Mode Toggle Script -->
+<script>
+    const toggle = document.getElementById("darkToggle");
+    const body = document.body;
+    if (localStorage.getItem("dark-mode") === "enabled") {
+        body.classList.add("dark-mode");
+    }
+    toggle.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        localStorage.setItem("dark-mode", body.classList.contains("dark-mode") ? "enabled" : "disabled");
+    });
+</script>
+
+<!-- View Class Details Script -->
+<script>
+    function viewClassDetails(classId) {
+        window.location.href = '/student/classes?classId=' + classId;
+    }
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

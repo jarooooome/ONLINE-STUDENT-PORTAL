@@ -1,5 +1,6 @@
 package com.example.studentportal.repository;
 
+import com.example.studentportal.model.Section;
 import com.example.studentportal.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -42,6 +43,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Alias for findAllByRole - added for consistency
     List<User> findByRole(String role);
+
+
+    // In your UserRepository.java
+    List<User> findBySectionAndRole(Section section, String role);
+
+    List<User> findBySectionId(Long sectionId);
+
+
 
     /* ───────────── Section Handling ────────── */
 

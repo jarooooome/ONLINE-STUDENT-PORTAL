@@ -1,5 +1,6 @@
 package com.example.studentportal.service;
 
+import com.example.studentportal.model.Section;
 import com.example.studentportal.model.User;
 import com.example.studentportal.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -104,6 +105,15 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<User> getProfessors() {
         return userRepo.findByRole("PROFESSOR");
+    }
+
+    // <<< ADDED METHOD TO FIND STUDENTS BY SECTION >>>
+    @Transactional(readOnly = true)
+    public List<User> findStudentsBySection(Section section) {
+        if (section == null) {
+            return List.of();
+        }
+        return userRepo.findBySectionAndRole(section, "STUDENT");
     }
 
     /* ─────────────────────────── UPDATE / DELETE ─────────────────────────── */

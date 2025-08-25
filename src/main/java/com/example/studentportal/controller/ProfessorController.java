@@ -32,11 +32,6 @@ public class ProfessorController {
         return "professor/professor-dashboard";
     }
 
-    @GetMapping("/classes")
-    public String myClasses(Model model) {
-        // TODO: Add logic to get professor's classes
-        return "professor/professor-classes"; // create a corresponding Thymeleaf template
-    }
 
     @GetMapping("/grades")
     public String submitGrades(Model model) {
