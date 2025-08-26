@@ -10,6 +10,13 @@
     .sidebar a, .sidebar .btn { color:#fff; display:block; padding:0.75rem 1rem; text-decoration:none; }
     .sidebar a:hover { background:#495057; }
     .stat { font-size:1.1rem; }
+    .tuition-breakdown { background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 15px; }
+    .breakdown-item { display: flex; justify-content: space-between; padding: 5px 0; }
+    .breakdown-total { border-top: 2px solid #dee2e6; padding-top: 10px; font-weight: bold; }
+    .semester-header { color: #0d6efd; font-weight: 600; margin-top: 15px; margin-bottom: 10px; }
+    .semester-btn { margin-right: 8px; margin-bottom: 10px; }
+    .semester-content { display: none; }
+    .semester-content.active { display: block; }
   </style>
 </head>
 <body>
@@ -33,12 +40,161 @@
         <a class="btn btn-secondary" href="/cashier/dashboard">Back</a>
       </div>
 
+      <!-- Student Info -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">Student Information</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <strong>Course:</strong>
+              <span th:text="${student.course != null ? student.course.title : 'Not assigned'}">Not assigned</span>
+            </div>
+            <div class="col-md-4">
+              <strong>Year Level:</strong>
+              <span th:text="${student.yearLevel != null ? student.yearLevel : 'Not assigned'}">Not assigned</span>
+            </div>
+            <div class="col-md-4">
+              <strong>Section:</strong>
+              <span th:text="${student.section != null ? student.section.name : 'Not assigned'}">Not assigned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Balance Card -->
       <div class="row g-3">
         <div class="col-md-6">
           <div class="card shadow-sm">
             <div class="card-header">Tuition Assessment</div>
             <div class="card-body">
+              <!-- Tuition Breakdown by Semester -->
+              <div class="tuition-breakdown" th:if="${student.course != null && (!#lists.isEmpty(firstSemesterSubjects) || !#lists.isEmpty(secondSemesterSubjects) || !#lists.isEmpty(otherSemesterSubjects))}">
+                <h6>Tuition Breakdown (Based on Subjects)</h6>
+
+                <!-- Semester Toggle Buttons -->
+                <div class="mb-3">
+                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('all')">All Semesters</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('first')"
+                          th:if="${!#lists.isEmpty(firstSemesterSubjects)}">1st Semester</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('second')"
+                          th:if="${!#lists.isEmpty(secondSemesterSubjects)}">2nd Semester</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('other')"
+                          th:if="${!#lists.isEmpty(otherSemesterSubjects)}">Other Subjects</button>
+                </div>
+
+                <!-- All Semesters View -->
+                <div id="semester-all" class="semester-content active">
+                  <!-- First Semester -->
+                  <div th:if="${!#lists.isEmpty(firstSemesterSubjects)}">
+                    <h7 class="semester-header">First Semester</h7>
+                    <div class="breakdown-item" th:each="subject : ${firstSemesterSubjects}">
+                      <div>
+                        <span th:text="${subject.code + ' - ' + subject.name}">Subject</span>
+                        <br>
+                        <small class="text-muted" th:text="|${subject.units} units|"></small>
+                      </div>
+                      <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <div class="breakdown-item">
+                      <span>First Semester Subtotal:</span>
+                      <span th:text="${'₱' + #numbers.formatDecimal(firstSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <hr>
+                  </div>
+
+                  <!-- Second Semester -->
+                  <div th:if="${!#lists.isEmpty(secondSemesterSubjects)}">
+                    <h7 class="semester-header">Second Semester</h7>
+                    <div class="breakdown-item" th:each="subject : ${secondSemesterSubjects}">
+                      <div>
+                        <span th:text="${subject.code + ' - ' + subject.name}">Subject</span>
+                        <br>
+                        <small class="text-muted" th:text="|${subject.units} units|"></small>
+                      </div>
+                      <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <div class="breakdown-item">
+                      <span>Second Semester Subtotal:</span>
+                      <span th:text="${'₱' + #numbers.formatDecimal(secondSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <hr>
+                  </div>
+
+                  <!-- Other Semesters -->
+                  <div th:if="${!#lists.isEmpty(otherSemesterSubjects)}">
+                    <h7 class="semester-header">Other Subjects</h7>
+                    <div class="breakdown-item" th:each="subject : ${otherSemesterSubjects}">
+                      <div>
+                        <span th:text="${subject.code + ' - ' + subject.name}">Subject</span>
+                        <br>
+                        <small class="text-muted" th:text="|${subject.semester != null ? subject.semester : 'No semester'} • ${subject.units} units|"></small>
+                      </div>
+                      <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <hr>
+                  </div>
+                </div>
+
+                <!-- First Semester Only -->
+                <div id="semester-first" class="semester-content">
+                  <h7 class="semester-header">First Semester Subjects</h7>
+                  <div class="breakdown-item" th:each="subject : ${firstSemesterSubjects}">
+                    <div>
+                      <span th:text="${subject.code + ' - ' + subject.name}">Subject</span>
+                      <br>
+                      <small class="text-muted" th:text="|${subject.units} units|"></small>
+                    </div>
+                    <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                  </div>
+                  <div class="breakdown-item breakdown-total">
+                    <span>First Semester Total:</span>
+                    <span th:text="${'₱' + #numbers.formatDecimal(firstSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                  </div>
+                </div>
+
+                <!-- Second Semester Only -->
+                <div id="semester-second" class="semester-content">
+                  <h7 class="semester-header">Second Semester Subjects</h7>
+                  <div class="breakdown-item" th:each="subject : ${secondSemesterSubjects}">
+                    <div>
+                      <span th:text="${subject.code + ' - ' + subject.name}">Subject</span>
+                      <br>
+                      <small class="text-muted" th:text="|${subject.units} units|"></small>
+                    </div>
+                    <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                  </div>
+                  <div class="breakdown-item breakdown-total">
+                    <span>Second Semester Total:</span>
+                    <span th:text="${'₱' + #numbers.formatDecimal(secondSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                  </div>
+                </div>
+
+                <!-- Other Subjects Only -->
+                <div id="semester-other" class="semester-content">
+                  <h7 class="semester-header">Other Subjects</h7>
+                  <div class="breakdown-item" th:each="subject : ${otherSemesterSubjects}">
+                    <div>
+                      <span th:text="${subject.code + ' - ' + subject.name}">Subject</span>
+                      <br>
+                      <small class="text-muted" th:text="|${subject.semester != null ? subject.semester : 'No semester'} • ${subject.units} units|"></small>
+                    </div>
+                    <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                  </div>
+                </div>
+
+                <!-- Rate per unit and Grand Total (always visible) -->
+                <div class="breakdown-item text-muted small">
+                  <span>Rate per unit:</span>
+                  <span th:text="${'₱' + #numbers.formatDecimal(ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+
+                <!-- Grand Total -->
+                <div class="breakdown-item breakdown-total">
+                  <span>Total Calculated Tuition:</span>
+                  <span th:text="${'₱' + #numbers.formatDecimal(calculatedTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+              </div>
+
               <p class="stat mb-1">Total Tuition:
                 <strong th:text="${balance != null ? #numbers.formatDecimal(balance.totalTuition, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</strong></p>
               <p class="stat mb-1">Amount Paid:
@@ -52,7 +208,7 @@
                 <div class="col-md-7">
                   <label class="form-label small mb-1">Set/Update Total Tuition</label>
                   <input class="form-control" type="number" step="0.01" name="totalTuition"
-                         th:value="${balance != null ? balance.totalTuition : 0}" required>
+                         th:value="${balance != null ? balance.totalTuition : (calculatedTuition != null ? calculatedTuition : 0)}" required>
                 </div>
                 <div class="col-md-5 d-flex align-items-end">
                   <button class="btn btn-warning w-100">Save Tuition</button>
@@ -142,5 +298,27 @@
     </main>
   </div>
 </div>
+
+<script>
+  function showSemester(semester) {
+    // Hide all semester contents
+    document.querySelectorAll('.semester-content').forEach(content => {
+      content.classList.remove('active');
+    });
+
+    // Show the selected semester
+    document.getElementById('semester-' + semester).classList.add('active');
+
+    // Update button styles (optional: you can add active styling to buttons too)
+    document.querySelectorAll('.semester-btn').forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline-primary');
+    });
+
+    // Add active class to clicked button (optional)
+    event.target.classList.remove('btn-outline-primary');
+    event.target.classList.add('btn-primary');
+  }
+</script>
 </body>
-</html>
+</html> 

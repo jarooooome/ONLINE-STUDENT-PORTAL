@@ -3,9 +3,11 @@ package com.example.studentportal.controller;
 import com.example.studentportal.model.PaymentTransaction;
 import com.example.studentportal.model.TuitionBalance;
 import com.example.studentportal.model.User;
+import com.example.studentportal.model.Subject;
 import com.example.studentportal.service.PaymentTransactionService;
 import com.example.studentportal.service.TuitionBalanceService;
 import com.example.studentportal.service.UserService;
+import com.example.studentportal.service.SubjectService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,13 +26,16 @@ public class CashierController {
     private final UserService userService;
     private final TuitionBalanceService balanceService;
     private final PaymentTransactionService txService;
+    private final SubjectService subjectService;
 
     public CashierController(UserService userService,
                              TuitionBalanceService balanceService,
-                             PaymentTransactionService txService) {
+                             PaymentTransactionService txService,
+                             SubjectService subjectService) {
         this.userService = userService;
         this.balanceService = balanceService;
         this.txService = txService;
+        this.subjectService = subjectService;
     }
 
     @GetMapping("/dashboard")
@@ -50,9 +56,51 @@ public class CashierController {
         Optional<TuitionBalance> balOpt = balanceService.findByStudent(student);
         List<PaymentTransaction> txs = txService.listByStudent(student);
 
+        // Calculate tuition based on subjects separated by semester
+        double ratePerUnit = 2000.00; // Set your rate per unit here
+        double firstSemesterTuition = 0.00;
+        double secondSemesterTuition = 0.00;
+        double totalCalculatedTuition = 0.00;
+
+        List<Subject> firstSemesterSubjects = new ArrayList<>();
+        List<Subject> secondSemesterSubjects = new ArrayList<>();
+        List<Subject> otherSemesterSubjects = new ArrayList<>();
+
+        if (student.getCourse() != null) {
+            List<Subject> allSubjects = subjectService.getSubjectsByCourseId(student.getCourse().getId());
+
+            for (Subject subject : allSubjects) {
+                if (subject.getUnits() != null) {
+                    double subjectCost = subject.getUnits() * ratePerUnit;
+
+                    if ("1st Sem".equalsIgnoreCase(subject.getSemester())) {
+                        firstSemesterTuition += subjectCost;
+                        firstSemesterSubjects.add(subject);
+                    } else if ("2nd Sem".equalsIgnoreCase(subject.getSemester())) {
+                        secondSemesterTuition += subjectCost;
+                        secondSemesterSubjects.add(subject);
+                    } else {
+                        // Handle subjects without semester or with other semester values
+                        totalCalculatedTuition += subjectCost;
+                        otherSemesterSubjects.add(subject);
+                    }
+                }
+            }
+
+            totalCalculatedTuition += firstSemesterTuition + secondSemesterTuition;
+        }
+
         model.addAttribute("student", student);
         model.addAttribute("balance", balOpt.orElse(null));
         model.addAttribute("transactions", txs);
+        model.addAttribute("firstSemesterSubjects", firstSemesterSubjects);
+        model.addAttribute("secondSemesterSubjects", secondSemesterSubjects);
+        model.addAttribute("otherSemesterSubjects", otherSemesterSubjects);
+        model.addAttribute("firstSemesterTuition", firstSemesterTuition);
+        model.addAttribute("secondSemesterTuition", secondSemesterTuition);
+        model.addAttribute("ratePerUnit", ratePerUnit);
+        model.addAttribute("calculatedTuition", totalCalculatedTuition);
+
         return "cashier/cashier-student";
     }
 
