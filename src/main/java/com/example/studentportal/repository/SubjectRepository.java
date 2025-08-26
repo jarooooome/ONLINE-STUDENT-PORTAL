@@ -16,6 +16,10 @@ public interface SubjectRepository extends JpaRepository<Subject, Long> {
     // NEW METHOD: Find subjects by Course entity
     List<Subject> findByCourse(Course course);
 
+    // Fetch subjects for all courses in a given section
+    List<Subject> findByCourseIn(List<Course> courses);
+
+
     // Existing methods for duplicate checking (case-insensitive)
     boolean existsByCodeIgnoreCase(String code);
     boolean existsByNameIgnoreCase(String name);

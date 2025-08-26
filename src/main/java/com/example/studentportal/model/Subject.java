@@ -17,7 +17,9 @@ public class Subject {
 
     private boolean active = true;  // default to true
 
-    private String semester;  // <-- added this
+    private String semester;  // e.g., "1st Semester", "2nd Semester"
+
+    private Integer units;    // <-- added field for credit units
 
     @ManyToOne
     @JoinColumn(name = "course_id")
@@ -74,6 +76,14 @@ public class Subject {
 
     public void setSemester(String semester) {
         this.semester = semester;
+    }
+
+    public Integer getUnits() {
+        return units;
+    }
+
+    public void setUnits(Integer units) {
+        this.units = units;
     }
 
     public Course getCourse() {

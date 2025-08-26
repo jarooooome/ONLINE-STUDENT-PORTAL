@@ -166,6 +166,7 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Semester</th>
+                <th>Units</th> <!-- ✅ new column -->
                 <th>Course</th>
                 <th class="text-end">Actions</th>
               </tr>
@@ -176,6 +177,7 @@
                 <td th:text="${subject.name}">Intro to CS</td>
                 <td th:text="${subject.description}">Basics of computing</td>
                 <td th:text="${subject.semester}">1st Sem</td>
+                <td th:text="${subject.units}">3</td> <!-- ✅ show units -->
                 <td class="course-code" th:text="${subject.course?.code}">BSIT</td>
                 <td class="text-end">
                   <a th:href="@{'/registrar/subjects/edit/' + ${subject.id}}" class="btn btn-sm btn-warning me-2">
@@ -188,7 +190,7 @@
                 </td>
               </tr>
               <tr th:if="${#lists.isEmpty(subjects)}">
-                <td colspan="6" class="text-center text-muted">No subjects found.</td>
+                <td colspan="7" class="text-center text-muted">No subjects found.</td>
               </tr>
               </tbody>
             </table>

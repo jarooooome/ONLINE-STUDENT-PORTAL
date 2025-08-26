@@ -107,6 +107,12 @@
           <textarea th:field="*{description}" id="description" class="form-control" rows="3"></textarea>
         </div>
 
+        <!-- ✅ Units Field (Fixed) -->
+        <div class="mb-3">
+          <label for="units" class="form-label">Units</label>
+          <input type="number" th:field="*{units}" id="units" class="form-control" min="1" required>
+        </div>
+
         <div class="mb-3">
           <label for="semester" class="form-label">Semester</label>
           <select th:field="*{semester}" id="semester" class="form-select" required>
