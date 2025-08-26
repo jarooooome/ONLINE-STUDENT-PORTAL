@@ -21,6 +21,7 @@
                 <p th:text="'Logged in as: ' + ${#authentication.name}">cashier</p>
             </div>
             <a href="/cashier/dashboard">Dashboard</a>
+            <a href="/cashier/calendar">Academic Calendar</a>
             <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
             <form id="logoutForm" th:action="@{/auth/logout}" method="post" class="d-none"></form>
         </aside>

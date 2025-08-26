@@ -44,4 +44,8 @@ public class ProfessorController {
         // TODO: Add logic to show professor's schedule
         return "professor/professor-schedule"; // create a corresponding Thymeleaf template
     }
+    @GetMapping("/calendar")
+    public String calendar() {
+        return "professor/professor-calendar";
+    }
 }

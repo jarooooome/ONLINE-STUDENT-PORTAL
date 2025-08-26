@@ -1,111 +1,184 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Academic Calendar - Admin</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Admin - Academic Calendar</title>
 
-  <!-- Bootstrap CSS -->
+  <!-- Bootstrap CSS and Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    :root {
+      --primary: #4e73df;
+      --primary-dark: #224abe;
+      --light: #f8f9fc;
+      --dark-bg: #2c2f33;
+      --dark-text: #f0f0f0;
+      --success: #1cc88a;
     }
+
     body {
+      background-color: var(--light);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s, color 0.3s;
       overflow-x: hidden;
+      display: flex;
+      flex-direction: row;
     }
+
+    body.dark-mode {
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+    }
+
     .sidebar {
+      background: #343a40;
       min-height: 100vh;
-      background-color: #343a40;
-      padding-top: 1rem;
+      color: white;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
     }
-    .sidebar a,
-    .logout-form button {
-      color: #fff;
-      padding: 0.75rem 1.25rem;
+
+    .sidebar .nav-link {
+      color: rgba(255,255,255,0.8);
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      margin: 0.25rem 1rem;
       text-decoration: none;
       display: block;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: rgba(255,255,255,0.15);
+      color: white;
+    }
+
+    .sidebar .nav-link.active {
+      background-color: rgba(255,255,255,0.25);
+      color: #fff;
+    }
+
+    .logout-form {
+      margin: auto 1rem 1rem 1rem;
+    }
+
+    .logout-form button {
+      width: 100%;
+      padding: 0.75rem;
       border: none;
-      background: none;
+      border-radius: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-weight: 500;
+      transition: background 0.2s;
       text-align: left;
     }
-    .sidebar a:hover,
+
     .logout-form button:hover {
-      background-color: #495057;
+      background-color: rgba(255, 255, 255, 0.25);
     }
-    .sidebar a.active {
-      background-color: #495057;
-      font-weight: bold;
+
+    /* Main content */
+    main {
+      flex: 1;
+      padding: 2rem;
     }
-    .logout-form {
-      margin-top: auto;
-    }
+
+    /* Calendar container styling */
     #calendar {
       max-width: 1100px;
       margin: 0 auto;
-      min-height: 600px;
+      height: 700px;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      background: white;
+      padding: 1rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
     }
+
+    body.dark-mode #calendar {
+      background: #444;
+      color: var(--dark-text);
+    }
+
+    /* Make each day cell scrollable instead of stretching */
+    .fc-daygrid-day-events {
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
     .fc {
       font-size: 1rem;
     }
   </style>
 </head>
 <body>
-<div class="container-fluid h-100">
-  <div class="row h-100">
-    <!-- Sidebar -->
-    <nav class="col-md-2 sidebar d-flex flex-column">
-      <div class="text-white px-3 mb-4">
-        <h4 class="mt-3">Admin Panel</h4>
-        <small th:text="'Logged in as: ' + ${#authentication.name}">admin</small>
+
+<!-- Sidebar -->
+<nav class="sidebar d-flex flex-column py-4">
+  <div class="text-white ps-4 mb-3 fs-5 fw-bold">Admin Panel</div>
+  <small class="text-white px-4" th:text="'Logged in as: ' + ${#authentication.name}">admin</small>
+
+  <a href="/admin/dashboard" class="nav-link">
+    <i class="fas fa-home me-2"></i>Dashboard
+  </a>
+  <a href="/admin/users" class="nav-link">
+    <i class="fas fa-users me-2"></i>Manage Users
+  </a>
+  <a href="/admin/students" class="nav-link">
+    <i class="fas fa-user-graduate me-2"></i>Student Records
+  </a>
+  <a href="/admin/courses" class="nav-link">
+    <i class="fas fa-graduation-cap me-2"></i>Courses
+  </a>
+  <a href="/admin/subject-schedule" class="nav-link">
+    <i class="fas fa-book me-2"></i>Subjects and Schedule
+  </a>
+  <a href="/admin/grades" class="nav-link">
+    <i class="fas fa-chart-line me-2"></i>Grade Management
+  </a>
+  <a href="/admin/calendar" class="nav-link active">
+    <i class="fas fa-calendar-alt me-2"></i>Academic Calendar
+  </a>
+
+  <!-- Logout Button -->
+  <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
+    <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+  </form>
+</nav>
+
+<!-- Main Content -->
+<main>
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2><i class="fas fa-calendar-alt me-2"></i>Academic Calendar Management</h2>
+      <div>
+        <a href="/admin/dashboard" class="btn btn-secondary me-2"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+          <i class="fas fa-plus"></i> Add Event
+        </button>
       </div>
+    </div>
 
-      <a href="/admin/dashboard" class=""><i class="fas fa-home me-2"></i>Dashboard</a>
-      <a href="/admin/users"><i class="fas fa-users me-2"></i>Manage Users</a>
-      <a href="/admin/students"><i class="fas fa-user-graduate me-2"></i>Student Records</a>
-      <a href="/admin/courses"><i class="fas fa-graduation-cap me-2"></i>Courses</a>
-      <a href="/admin/subjects"><i class="fas fa-book me-2"></i>Subjects and Schedule</a>
-      <a href="#"><i class="fas fa-chart-line me-2"></i>Grade Management</a>
-      <a href="/admin/calendar" class="active"><i class="fas fa-calendar-alt me-2"></i>Academic Calendar</a>
+    <!-- Success Message Alert -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <i class="fas fa-check-circle me-2"></i>
+      <span th:text="${successMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
-      <!-- Logout -->
-      <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto px-3 py-2">
-        <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
-      </form>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="col-md-10">
-      <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2>
-            <i class="fas fa-calendar-alt me-2"></i>Academic Calendar (Admin)
-          </h2>
-          <div>
-            <a href="/admin/dashboard" class="btn btn-secondary me-2"
-            ><i class="fas fa-arrow-left"></i> Dashboard</a
-            >
-            <button
-                    class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addModal"
-            >
-              <i class="fas fa-plus"></i> Add Event
-            </button>
-          </div>
-        </div>
-        <div id="calendar"></div>
-      </div>
-    </main>
+    <div id="calendar"></div>
   </div>
-</div>
+</main>
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
@@ -113,11 +186,7 @@
     <form id="addForm" class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Add Event</h5>
-        <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
@@ -139,22 +208,12 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Description</label>
-          <textarea
-                  name="description"
-                  class="form-control"
-                  rows="3"
-          ></textarea>
+          <textarea name="description" class="form-control" rows="3"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-success">Create</button>
-        <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-        >
-          Cancel
-        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
   </div>
@@ -166,31 +225,17 @@
     <form id="editForm" class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Edit Event</h5>
-        <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="id" />
         <div class="mb-3">
           <label class="form-label">Title</label>
-          <input
-                  type="text"
-                  name="title"
-                  class="form-control"
-                  required
-          />
+          <input type="text" name="title" class="form-control" required />
         </div>
         <div class="mb-3">
           <label class="form-label">Date</label>
-          <input
-                  type="date"
-                  name="date"
-                  class="form-control"
-                  required
-          />
+          <input type="date" name="date" class="form-control" required />
         </div>
         <div class="mb-3">
           <label class="form-label">Type</label>
@@ -203,34 +248,22 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Description</label>
-          <textarea
-                  name="description"
-                  class="form-control"
-                  rows="3"
-          ></textarea>
+          <textarea name="description" class="form-control" rows="3"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-primary">Save</button>
-        <button id="deleteBtn" type="button" class="btn btn-danger">
-          Delete
-        </button>
-        <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-        >
-          Cancel
-        </button>
+        <button id="deleteBtn" type="button" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- JS: Bootstrap & FullCalendar -->
+<!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- FullCalendar Global Bundle (includes all plugins) -->
+<!-- FullCalendar JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <script>
@@ -247,6 +280,8 @@
         center: 'title',
         right: 'dayGridMonth,listWeek',
       },
+      contentHeight: 600,   // fixed height prevents stretching
+      expandRows: true,     // keep rows even
       events: {
         url: apiBase,
         failure: function () {
@@ -254,9 +289,7 @@
         },
       },
       dateClick: function (info) {
-        const addModal = new bootstrap.Modal(
-          document.getElementById('addModal')
-        );
+        const addModal = new bootstrap.Modal(document.getElementById('addModal'));
         document.getElementById('addForm').reset();
         document.querySelector('#addForm [name="date"]').value = info.dateStr;
         addModal.show();
@@ -267,7 +300,7 @@
         const form = document.getElementById('editForm');
         form.id.value = ev.id;
         form.title.value = ev.title;
-        form.date.value = ev.startStr.substring(0, 10); // Ensure proper date format
+        form.date.value = ev.startStr.substring(0, 10);
         form.eventType.value = props.eventType || '';
         form.description.value = props.description || '';
         new bootstrap.Modal(document.getElementById('editModal')).show();
@@ -276,7 +309,6 @@
 
     calendar.render();
 
-    // Add CSRF token to headers if using Spring Security
     function getCsrfToken() {
       return document.querySelector('meta[name="_csrf"]')?.content || '';
     }

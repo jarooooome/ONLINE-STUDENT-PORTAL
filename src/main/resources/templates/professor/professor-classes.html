@@ -45,12 +45,10 @@
         <h4>Professor Panel</h4>
         <p th:text="'Logged in as: ' + ${#authentication.name}">professor</p>
       </div>
-      <a href="/professor/dashboard" class="nav-link"><i class="fas fa-home me-2"></i>Dashboard</a>
-      <a href="/professor/classes" class="nav-link active"><i class="fas fa-chalkboard me-2"></i>My Classes</a>
-      <a href="/professor/schedules" class="nav-link"><i class="fas fa-calendar-alt me-2"></i>My Schedules</a>
+      <a href="/professor/dashboard" class="nav-link active"><i class="fas fa-home me-2"></i>Dashboard</a>
+      <a href="/professor/schedules" class="nav-link"><i class="fas fa-calendar-alt me-2"></i>My Classes and Schedules</a>
       <a href="/professor/grades" class="nav-link"><i class="fas fa-chart-line me-2"></i>Submit Grades</a>
-      <a href="/professor/attendance" class="nav-link"><i class="fas fa-clipboard-check me-2"></i>Attendance</a>
-      <a href="/professor/students" class="nav-link"><i class="fas fa-user-graduate me-2"></i>Students</a>
+      <a href="/professor/calendar" class="nav-link"><i class="fas fa-chart-line me-2"></i>Academic Calendar</a>
       <form th:action="@{/auth/logout}" method="post" class="logout-form mt-auto">
         <button type="submit"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
       </form>

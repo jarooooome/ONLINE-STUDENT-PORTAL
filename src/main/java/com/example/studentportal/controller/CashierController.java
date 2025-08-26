@@ -140,4 +140,9 @@ public class CashierController {
         txService.delete(txId);
         return "redirect:/cashier/student/" + studentId;
     }
+
+    @GetMapping("/calendar")
+    public String calendar() {
+        return "cashier/cashier-calendar";
+    }
 }
