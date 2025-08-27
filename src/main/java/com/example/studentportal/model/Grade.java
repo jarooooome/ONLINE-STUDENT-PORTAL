@@ -50,51 +50,93 @@ public class Grade {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and setters...
-
+    // Getters and Setters
     public Long getId() {
         return id;
     }
+
     public User getStudent() {
         return student;
     }
+
     public void setStudent(User student) {
         this.student = student;
     }
+
     public Subject getSubject() {
         return subject;
     }
+
     public void setSubject(Subject subject) {
         this.subject = subject;
     }
+
     public String getSemester() {
         return semester;
     }
+
     public void setSemester(String semester) {
         this.semester = semester;
     }
+
     public Double getValue() {
         return value;
     }
+
     public void setValue(Double value) {
         this.value = value;
+        updateTimestamp();
     }
+
     public GradeStatus getStatus() {
         return status;
     }
+
     public void setStatus(GradeStatus status) {
         this.status = status;
+        updateTimestamp();
     }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+
+    // Workflow convenience methods
+    public void submitToRegistrar() {
+        if (status == GradeStatus.DRAFT || status == GradeStatus.VERIFIED) {
+            status = GradeStatus.SUBMITTED_TO_REGISTRAR;
+            updateTimestamp();
+        }
     }
+
+    public void verify() {
+        if (status == GradeStatus.DRAFT) {
+            status = GradeStatus.VERIFIED;
+            updateTimestamp();
+        }
+    }
+
+    public void publish() {
+        if (status == GradeStatus.VERIFIED || status == GradeStatus.SUBMITTED_TO_REGISTRAR) {
+            status = GradeStatus.PUBLISHED;
+            updateTimestamp();
+        }
+    }
+
+    public void updateTimestamp() {
+        this.updatedAt = LocalDateTime.now();
+    }
+    public void submit() {
+        if (this.status == GradeStatus.DRAFT || this.status == GradeStatus.VERIFIED) {
+            this.status = GradeStatus.SUBMITTED_TO_REGISTRAR;
+            updateTimestamp();
+        } else {
+            throw new IllegalStateException("Cannot submit grade in current status: " + this.status);
+        }
+    }
+
 }

@@ -44,20 +44,23 @@ public class SubjectController {
 
     // Save the new subject
     @PostMapping("/subjects/save")
-    public String saveSubject(@ModelAttribute("subject") Subject subject, RedirectAttributes redirectAttributes) {
-        // Check for duplicate subject code
+    public String saveSubject(@ModelAttribute("subject") Subject subject,
+                              RedirectAttributes redirectAttributes) {
+
+        // Check for duplicate code
         if (subjectRepository.existsByCodeIgnoreCase(subject.getCode())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Subject code already exists");
             return "redirect:/admin/subjects/add";
         }
 
-        // Check for duplicate subject name
+        // Check for duplicate name
         if (subjectRepository.existsByNameIgnoreCase(subject.getName())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Subject name already exists");
             return "redirect:/admin/subjects/add";
         }
 
         subjectRepository.save(subject);
+        redirectAttributes.addFlashAttribute("successMessage", "Subject added successfully");
         return "redirect:/admin/subjects";
     }
 
@@ -65,7 +68,9 @@ public class SubjectController {
     @GetMapping("/subjects/edit/{id}")
     public String showEditSubjectForm(@PathVariable("id") Long id, Model model) {
         Subject subject = subjectRepository.findById(id).orElse(null);
-        if (subject == null) return "redirect:/admin/subjects";
+        if (subject == null) {
+            return "redirect:/admin/subjects";
+        }
 
         model.addAttribute("subject", subject);
         model.addAttribute("courses", courseRepository.findAll());
@@ -75,15 +80,19 @@ public class SubjectController {
 
     // Save updated subject
     @PostMapping("/subjects/update")
-    public String updateSubject(@ModelAttribute("subject") Subject subject) {
+    public String updateSubject(@ModelAttribute("subject") Subject subject,
+                                RedirectAttributes redirectAttributes) {
         subjectRepository.save(subject);
+        redirectAttributes.addFlashAttribute("successMessage", "Subject updated successfully");
         return "redirect:/admin/subjects";
     }
 
     // Delete subject
     @GetMapping("/subjects/delete/{id}")
-    public String deleteSubject(@PathVariable("id") Long id) {
+    public String deleteSubject(@PathVariable("id") Long id,
+                                RedirectAttributes redirectAttributes) {
         subjectRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Subject deleted successfully");
         return "redirect:/admin/subjects";
     }
 
@@ -92,7 +101,9 @@ public class SubjectController {
     @ResponseBody
     public List<SubjectDTO> getSubjectsByCourse(@RequestParam Long courseId) {
         List<Subject> subjects = subjectRepository.findByCourseId(courseId);
-        if (subjects == null) return List.of();
+        if (subjects == null || subjects.isEmpty()) {
+            return List.of();
+        }
 
         return subjects.stream()
                 .map(s -> new SubjectDTO(

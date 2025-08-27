@@ -27,5 +27,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             + "(:semester IS NULL OR g.semester = :semester)")
     List<Grade> findFiltered(User student, Subject subject, String semester);
 
+    // Add to GradeRepository
+    List<Grade> findAll();
     List<Grade> findByStatus(GradeStatus status);
 }

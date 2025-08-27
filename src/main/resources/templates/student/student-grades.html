@@ -57,6 +57,12 @@
 
         .semester-btns { margin-bottom: 1rem; }
         .semester-btns button { margin-right: 0.5rem; }
+
+        .status-badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+
+        .subject-row { transition: background-color 0.2s; }
+        .subject-row:hover { background-color: #f8f9fa; }
+        body.dark-mode .subject-row:hover { background-color: #3a3d42; }
     </style>
 </head>
 <body>
@@ -95,65 +101,111 @@
         <!-- Main Content -->
         <main class="col-md-10 main-content">
 
-            <!-- Grades Table (Only shows subjects with grades) -->
-            <div class="grades-card mb-4">
-                <div class="grades-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-chart-bar me-2"></i>My Grades</span>
-                    <!-- Semester Buttons -->
-                    <div class="semester-btns">
-                        <button class="btn btn-sm btn-outline-primary" onclick="showSemester('1st-Sem')">Semester 1</button>
-                        <button class="btn btn-sm btn-outline-primary" onclick="showSemester('2nd-Sem')">Semester 2</button>
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Progress Summary Card -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Total Subjects</h5>
+                            <h2 class="card-text" th:text="${totalSubjects}">15</h2>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div th:if="${#lists.isEmpty(grades)}" class="no-grades">
-                        <i class="fas fa-book-open no-grades-icon"></i>
-                        <h4>No grades available yet</h4>
-                        <p>Your grades will appear here once they're published</p>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Graded</h5>
+                            <h2 class="card-text" th:text="${passedSubjects + failedSubjects}">10</h2>
+                        </div>
                     </div>
-                    <div th:unless="${#lists.isEmpty(grades)}" class="table-responsive">
-                        <table class="table grades-table" id="gradesTable">
-                            <thead>
-                            <tr><th>Subject</th><th>Professor</th><th>Grade</th></tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="grade : ${grades}"
-                                th:class="'semester-' + ${#strings.replace(grade.subject.semester,' ','-')}">
-                                <td th:text="${grade.subject.name}">Subject Name</td>
-                                <td th:text="${#lists.isEmpty(grade.subject.schedules) ? 'TBA' : grade.subject.schedules[0].professor}">Professor</td>
-                                <td>
-                                    <span th:if="${grade.value != null}"
-                                          th:class="${grade.value >= 3 && grade.value <= 5} ? 'grade-value grade-fail' : 'grade-value grade-pass'"
-                                          th:text="${grade.value}">
-                                    </span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Passed</h5>
+                            <h2 class="card-text" th:text="${passedSubjects}">8</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger mb-3">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Failed</h5>
+                            <h2 class="card-text" th:text="${failedSubjects}">2</h2>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Transcript of Records (Shows all subjects) -->
+            <!-- GPA Summary -->
+            <div th:if="${passedSubjects + failedSubjects > 0}" class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h4 class="card-title">Current GPA:
+                                <span class="text-primary" th:text="${#numbers.formatDecimal(gpa, 1, 2)}">3.25</span>
+                            </h4>
+                            <p class="card-text text-muted">Based on published grades only</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Subjects with Grades Table -->
             <div class="grades-card">
                 <div class="grades-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-file-pdf me-2"></i>Transcript of Records</span>
-                    <button class="btn btn-primary btn-sm" onclick="exportPDF()"><i class="fas fa-file-pdf me-1"></i>Export PDF</button>
+                    <span><i class="fas fa-list-alt me-2"></i>All Subjects & Grades</span>
+                    <span class="badge bg-primary" th:text="'Subjects: ' + ${totalSubjects}"></span>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table grades-table" id="torTable">
+                        <table class="table grades-table">
                             <thead>
-                            <tr><th>Subject</th><th>Professor</th><th>Grade</th></tr>
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th>Semester</th>
+                            </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="subject : ${allSubjects}">
-                                <td th:text="${subject.name}">Subject Name</td>
-                                <td th:text="${#lists.isEmpty(subject.schedules) ? 'TBA' : subject.schedules[0].professor}">Professor</td>
+                            <tr th:each="swg : ${subjectsWithGrades}" class="subject-row">
+                                <td th:text="${swg.subject.code}">CS101</td>
+                                <td th:text="${swg.subject.name}">Introduction to Programming</td>
                                 <td>
-                                    <th:block th:each="grade : ${grades}" th:if="${grade.subject.id == subject.id}">
-                                        <span th:if="${grade.value != null}" th:text="${grade.value}"></span>
-                                    </th:block>
+                                    <span th:if="${swg.hasGrade() and swg.isPublished() and swg.grade.value != null}"
+                                          th:class="${swg.grade.value >= 3.0 && swg.grade.value <= 5.0} ?
+                                          'grade-value grade-fail' : 'grade-value grade-pass'"
+                                          th:text="${swg.grade.value}">
+                                        1.25
+                                    </span>
+                                    <span th:if="${swg.hasGrade() and !swg.isPublished()}"
+                                          class="text-muted fst-italic">Not published</span>
+                                    <span th:if="${!swg.hasGrade()}" class="text-muted">-</span>
+                                </td>
+                                <td>
+                                    <span th:if="${swg.hasGrade() and swg.isPublished()}"
+                                          class="badge bg-success status-badge">Published</span>
+                                    <span th:if="${swg.hasGrade() and swg.grade.status.name() == 'SUBMITTED_TO_REGISTRAR'}"
+                                          class="badge bg-info status-badge">Pending</span>
+                                    <span th:if="${swg.hasGrade() and swg.grade.status.name() == 'DRAFT'}"
+                                          class="badge bg-warning status-badge">Draft</span>
+                                    <span th:if="${!swg.hasGrade()}" class="badge bg-secondary status-badge">No Grade</span>
+                                </td>
+                                <td>
+                                    <span th:if="${swg.hasGrade()}" th:text="${swg.grade.semester}">2023-2024-2</span>
+                                    <span th:if="${!swg.hasGrade()}" class="text-muted">-</span>
                                 </td>
                             </tr>
                             </tbody>
@@ -166,47 +218,20 @@
     </div>
 </div>
 
-<!-- PDF Export Script -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-    function exportPDF() {
-        const element = document.getElementById('torTable');
-        html2pdf(element, {
-            margin: 0.5,
-            filename: 'Transcript_of_Records.pdf',
-            image: { type:'jpeg', quality:0.98 },
-            html2canvas: { scale:2 },
-            jsPDF: { unit:'in', format:'letter', orientation:'portrait' }
-        });
-    }
-</script>
-
-<!-- Semester Filter Script -->
-<script>
-    function showSemester(sem) {
-        const rows = document.querySelectorAll('#gradesTable tbody tr');
-        rows.forEach(row => {
-            row.style.display = row.classList.contains('semester-' + sem) ? '' : 'none';
-        });
-    }
-    // Show first semester initially
-    showSemester('1st-Sem');
-</script>
-
-<!-- Dark Mode Toggle Script -->
-<script>
-    const toggle = document.getElementById("darkToggle");
-    const body = document.body;
-    if (localStorage.getItem("dark-mode") === "enabled") body.classList.add("dark-mode");
-    if(toggle){
-        toggle.addEventListener("click", () => {
-            body.classList.toggle("dark-mode");
-            localStorage.setItem("dark-mode", body.classList.contains("dark-mode") ? "enabled" : "disabled");
-        });
-    }
-</script>
-
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Auto-dismiss alerts after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    });
+</script>
 </body>
 </html>

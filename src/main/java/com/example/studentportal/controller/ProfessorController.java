@@ -33,11 +33,7 @@ public class ProfessorController {
     }
 
 
-    @GetMapping("/grades")
-    public String submitGrades(Model model) {
-        // TODO: Add logic for grade submission
-        return "professor/professor-grades"; // create a corresponding Thymeleaf template
-    }
+
 
     @GetMapping("/schedule")
     public String classSchedule(Model model) {

@@ -3,7 +3,8 @@ package com.example.studentportal.model;
 public enum GradeStatus {
     DRAFT("Draft", "bg-secondary"),
     VERIFIED("Verified", "bg-warning text-dark"),
-    PUBLISHED("Published", "bg-success");
+    PUBLISHED("Published", "bg-success"),
+    SUBMITTED_TO_REGISTRAR("Submitted to Registrar", "bg-primary text-white");
 
     private final String displayName;
     private final String badgeClass;
