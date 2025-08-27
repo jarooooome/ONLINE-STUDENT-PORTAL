@@ -200,7 +200,7 @@
     </div>
 </div>
 
-<!-- Transaction Records Modal - UPDATED TO MATCH CASHIER-STUDENT.HTML -->
+<!-- Transaction Records Modal - UPDATED TO INCLUDE SEMESTER -->
 <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -214,6 +214,7 @@
                     <tr>
                         <th>Date</th>
                         <th>Amount</th>
+                        <th>Semester</th>
                         <th>Method</th>
                         <th>Reference</th>
                         <th>Recorded By</th>
@@ -223,12 +224,13 @@
                     <tr th:each="t : ${transactions}">
                         <td th:text="${#temporals.format(t.recordedAt, 'yyyy-MM-dd HH:mm')}">2025-08-15</td>
                         <td th:text="${'₱' + #numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                        <td th:text="${t.semester != null ? t.semester : '—'}">—</td>
                         <td th:text="${t.method}">Cash</td>
-                        <td th:text="${t.reference ?: '—'}">OR-001</td>
+                        <td th:text="${t.reference != null ? t.reference : '—'}">OR-001</td>
                         <td th:text="${t.recordedBy != null ? t.recordedBy.fullName : 'System'}">Cashier</td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(transactions)}">
-                        <td colspan="5" class="text-center text-muted">No payment records found</td>
+                        <td colspan="6" class="text-center text-muted">No payment records found</td>
                     </tr>
                     </tbody>
                 </table>

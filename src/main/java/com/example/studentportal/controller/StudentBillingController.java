@@ -1,8 +1,10 @@
 package com.example.studentportal.controller;
 
 import com.example.studentportal.model.PaymentInstallment;
+import com.example.studentportal.model.PaymentTransaction;
 import com.example.studentportal.model.TuitionBalance;
 import com.example.studentportal.model.User;
+import com.example.studentportal.service.PaymentTransactionService;
 import com.example.studentportal.service.TuitionBalanceService;
 import com.example.studentportal.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,16 +23,19 @@ public class StudentBillingController {
 
     private final UserService userService;
     private final TuitionBalanceService balanceService;
+    private final PaymentTransactionService paymentTransactionService;
 
     public StudentBillingController(UserService userService,
-                                    TuitionBalanceService balanceService) {
+                                    TuitionBalanceService balanceService,
+                                    PaymentTransactionService paymentTransactionService) {
         this.userService = userService;
         this.balanceService = balanceService;
+        this.paymentTransactionService = paymentTransactionService;
     }
 
     @GetMapping("/tuition-balance")
     public String viewTuitionBalance(Model model, Principal principal, HttpServletResponse response) {
-        // No-cache headers (like in your controllers)
+        // Prevent caching
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Expires", "0");
@@ -46,6 +51,10 @@ public class StudentBillingController {
         PaymentInstallment next = balanceService.getNextDue(me);
         String nextDue = (next != null) ? next.getDueDate().format(DateTimeFormatter.ISO_DATE) : "N/A";
         model.addAttribute("nextDueDate", nextDue);
+
+        // ✅ Fetch payment transactions for this student
+        List<PaymentTransaction> transactions = paymentTransactionService.getPaymentsForStudent(me);
+        model.addAttribute("transactions", transactions);
 
         return "student/tuition-balance";
     }

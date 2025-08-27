@@ -26,6 +26,12 @@ public class PaymentTransactionService {
         return txRepo.findByStudentOrderByRecordedAtDesc(student);
     }
 
+    /** ✅ Convenience method used in StudentBillingController */
+    @Transactional(readOnly = true)
+    public List<PaymentTransaction> getPaymentsForStudent(User student) {
+        return txRepo.findByStudentOrderByRecordedAtDesc(student);
+    }
+
     /** Record a payment (record only) and update balance + apply to oldest unpaid installments */
     @Transactional
     public PaymentTransaction record(User student, User cashier, BigDecimal amount, String semester, String method, String reference, String note) {
@@ -69,8 +75,6 @@ public class PaymentTransactionService {
         } else if (delta.compareTo(BigDecimal.ZERO) < 0) {
             // Rollback: decrease amountPaid and regenerate allocations by recomputing schedule payments.
             balanceService.subtractFromPaid(student, delta.negate());
-            // Simplest approach: clear paid flags and re-apply all transactions in order.
-            // (Keeps code short; good enough for this use case.)
             recomputeInstallmentApplications(student);
         }
         return saved;
