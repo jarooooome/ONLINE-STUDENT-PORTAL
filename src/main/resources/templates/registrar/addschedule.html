@@ -135,7 +135,7 @@
         <div class="mb-3">
           <label for="professor" class="form-label">Professor</label>
           <div class="d-flex align-items-center">
-            <select class="form-select" id="professor" name="professor" required>
+            <select class="form-select" id="professor" name="professorId" required>
               <option value="">-- Select Professor --</option>
               <option th:each="professor : ${professors}"
                       th:value="${professor.id}"
