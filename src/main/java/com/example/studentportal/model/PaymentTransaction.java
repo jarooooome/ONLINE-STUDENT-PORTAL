@@ -43,6 +43,10 @@ public class PaymentTransaction {
     @Column(nullable = false)
     private LocalDateTime recordedAt = LocalDateTime.now();
 
+    /** Semester the payment is for (1st Sem, 2nd Sem, Other) */
+    @Column(name = "semester")
+    private String semester;
+
     /* ───────── Getters/Setters ───────── */
     public Long getId() { return id; }
     public User getStudent() { return student; }
@@ -65,4 +69,7 @@ public class PaymentTransaction {
 
     public LocalDateTime getRecordedAt() { return recordedAt; }
     public void setRecordedAt(LocalDateTime recordedAt) { this.recordedAt = recordedAt; }
+
+    public String getSemester() { return semester; }
+    public void setSemester(String semester) { this.semester = semester; }
 }

@@ -17,6 +17,8 @@
     .semester-btn { margin-right: 8px; margin-bottom: 10px; }
     .semester-content { display: none; }
     .semester-content.active { display: block; }
+    .btn-semester-active { background-color: #0d6efd; color: white; border-color: #0d6efd; }
+    .semester-balance { background-color: #e9ecef; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -67,18 +69,39 @@
           <div class="card shadow-sm">
             <div class="card-header">Tuition Assessment</div>
             <div class="card-body">
+              <!-- Semester Balance Overview -->
+              <div class="semester-balance" th:if="${student.course != null}">
+                <h6>Semester Balances</h6>
+                <div class="breakdown-item" th:if="${!#lists.isEmpty(firstSemesterSubjects)}">
+                  <span>1st Semester Balance:</span>
+                  <span th:text="${'₱' + #numbers.formatDecimal(firstSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+                <div class="breakdown-item" th:if="${!#lists.isEmpty(secondSemesterSubjects)}">
+                  <span>2nd Semester Balance:</span>
+                  <span th:text="${'₱' + #numbers.formatDecimal(secondSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+                <div class="breakdown-item breakdown-total">
+                  <span>Total Balance:</span>
+                  <span th:text="${'₱' + #numbers.formatDecimal(calculatedTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+              </div>
+
               <!-- Tuition Breakdown by Semester -->
               <div class="tuition-breakdown" th:if="${student.course != null && (!#lists.isEmpty(firstSemesterSubjects) || !#lists.isEmpty(secondSemesterSubjects) || !#lists.isEmpty(otherSemesterSubjects))}">
                 <h6>Tuition Breakdown (Based on Subjects)</h6>
 
                 <!-- Semester Toggle Buttons -->
                 <div class="mb-3">
-                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('all')">All Semesters</button>
-                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('first')"
+                  <button type="button" class="btn btn-semester-active semester-btn"
+                          th:onclick="|showSemester(event, 'all', ${calculatedTuition})|">All Semesters</button>
+                  <button type="button" class="btn btn-outline-primary semester-btn"
+                          th:onclick="|showSemester(event, 'first', ${firstSemesterTuition})|"
                           th:if="${!#lists.isEmpty(firstSemesterSubjects)}">1st Semester</button>
-                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('second')"
+                  <button type="button" class="btn btn-outline-primary semester-btn"
+                          th:onclick="|showSemester(event, 'second', ${secondSemesterTuition})|"
                           th:if="${!#lists.isEmpty(secondSemesterSubjects)}">2nd Semester</button>
-                  <button type="button" class="btn btn-outline-primary btn-sm semester-btn" onclick="showSemester('other')"
+                  <button type="button" class="btn btn-outline-primary semester-btn"
+                          th:onclick="|showSemester(event, 'other', 0)|"
                           th:if="${!#lists.isEmpty(otherSemesterSubjects)}">Other Subjects</button>
                 </div>
 
@@ -146,10 +169,6 @@
                     </div>
                     <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
                   </div>
-                  <div class="breakdown-item breakdown-total">
-                    <span>First Semester Total:</span>
-                    <span th:text="${'₱' + #numbers.formatDecimal(firstSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
-                  </div>
                 </div>
 
                 <!-- Second Semester Only -->
@@ -162,10 +181,6 @@
                       <small class="text-muted" th:text="|${subject.units} units|"></small>
                     </div>
                     <span th:text="${'₱' + #numbers.formatDecimal(subject.units * ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
-                  </div>
-                  <div class="breakdown-item breakdown-total">
-                    <span>Second Semester Total:</span>
-                    <span th:text="${'₱' + #numbers.formatDecimal(secondSemesterTuition, 1, 'COMMA', 2, 'POINT')}"></span>
                   </div>
                 </div>
 
@@ -182,16 +197,16 @@
                   </div>
                 </div>
 
-                <!-- Rate per unit and Grand Total (always visible) -->
+                <!-- Rate per unit -->
                 <div class="breakdown-item text-muted small">
                   <span>Rate per unit:</span>
                   <span th:text="${'₱' + #numbers.formatDecimal(ratePerUnit, 1, 'COMMA', 2, 'POINT')}"></span>
                 </div>
 
-                <!-- Grand Total -->
+                <!-- Dynamic Total (changes based on selected semester) -->
                 <div class="breakdown-item breakdown-total">
-                  <span>Total Calculated Tuition:</span>
-                  <span th:text="${'₱' + #numbers.formatDecimal(calculatedTuition, 1, 'COMMA', 2, 'POINT')}"></span>
+                  <span id="total-label">Total Calculated Tuition:</span>
+                  <span id="total-amount" th:text="${'₱' + #numbers.formatDecimal(calculatedTuition, 1, 'COMMA', 2, 'POINT')}"></span>
                 </div>
               </div>
 
@@ -207,7 +222,7 @@
               <form th:action="@{'/cashier/assess/' + ${student.id}}" method="post" class="row g-2">
                 <div class="col-md-7">
                   <label class="form-label small mb-1">Set/Update Total Tuition</label>
-                  <input class="form-control" type="number" step="0.01" name="totalTuition"
+                  <input class="form-control" type="number" step="0.01" name="totalTuition" id="totalTuitionInput"
                          th:value="${balance != null ? balance.totalTuition : (calculatedTuition != null ? calculatedTuition : 0)}" required>
                 </div>
                 <div class="col-md-5 d-flex align-items-end">
@@ -221,12 +236,21 @@
         <!-- Record Payment -->
         <div class="col-md-6">
           <div class="card shadow-sm">
-            <div class="card-header">Record Payment (Record only)</div>
+            <div class="card-header">Record Payment</div>
             <div class="card-body">
               <form th:action="@{'/cashier/record/' + ${student.id}}" method="post" class="row g-2">
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <label class="form-label small mb-1">Amount</label>
                   <input class="form-control" type="number" step="0.01" name="amount" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small mb-1">For Semester</label>
+                  <select class="form-select" name="semester" required>
+                    <option value="">Select Semester</option>
+                    <option value="1st Sem" th:if="${!#lists.isEmpty(firstSemesterSubjects)}">1st Semester</option>
+                    <option value="2nd Sem" th:if="${!#lists.isEmpty(secondSemesterSubjects)}">2nd Semester</option>
+                    <option value="Other">Other/General</option>
+                  </select>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label small mb-1">Method</label>
@@ -236,15 +260,15 @@
                   <label class="form-label small mb-1">Reference</label>
                   <input class="form-control" type="text" name="reference" placeholder="OR/Ref No.">
                 </div>
-                <div class="col-12">
+                <div class="col-md-4">
                   <label class="form-label small mb-1">Note</label>
                   <input class="form-control" type="text" name="note" placeholder="Optional note">
                 </div>
                 <div class="col-12 d-grid">
-                  <button class="btn btn-success">Add Record</button>
+                  <button class="btn btn-success">Add Payment Record</button>
                 </div>
               </form>
-              <p class="small text-muted mt-2 mb-0">This only records an entry and updates the balance; it does not process any real payment.</p>
+              <p class="small text-muted mt-2 mb-0">This records payment for a specific semester and updates the balance accordingly.</p>
             </div>
           </div>
         </div>
@@ -259,6 +283,7 @@
             <tr>
               <th>Date</th>
               <th>Amount</th>
+              <th>Semester</th>
               <th>Method</th>
               <th>Reference</th>
               <th>Recorded By</th>
@@ -270,6 +295,7 @@
             <tr th:each="t : ${transactions}">
               <td th:text="${#temporals.format(t.recordedAt, 'yyyy-MM-dd HH:mm')}">2025-08-15</td>
               <td th:text="${#numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+              <td th:text="${t.semester != null ? t.semester : '—'}">—</td>
               <td th:text="${t.method}">Cash</td>
               <td th:text="${t.reference}">OR-001</td>
               <td th:text="${t.recordedBy != null ? t.recordedBy.fullName : '—'}">Cashier</td>
@@ -278,8 +304,8 @@
                 <!-- Update amount inline -->
                 <form th:action="@{'/cashier/transaction/' + ${t.id} + '/update'}" method="post" class="d-flex gap-2">
                   <input class="form-control form-control-sm" style="max-width:120px" type="number" step="0.01" name="amount" th:value="${t.amount}">
-                  <button class="btn btn-sm btn-primary">Update</button>
-                  <button class="btn btn-sm btn-outline-danger"
+                  <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
                           th:formaction="@{'/cashier/transaction/' + ${t.id} + '/delete'}"
                           onclick="return confirm('Delete this record? This will adjust the balance accordingly.');">
                     Delete
@@ -288,7 +314,7 @@
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(transactions)}">
-              <td colspan="7" class="text-center text-muted">No records yet.</td>
+              <td colspan="8" class="text-center text-muted">No records yet.</td>
             </tr>
             </tbody>
           </table>
@@ -300,24 +326,57 @@
 </div>
 
 <script>
-  function showSemester(semester) {
+  function showSemester(evt, semester, tuitionAmount) {
     // Hide all semester contents
     document.querySelectorAll('.semester-content').forEach(content => {
       content.classList.remove('active');
     });
 
-    // Show the selected semester
-    document.getElementById('semester-' + semester).classList.add('active');
+    // Show the selected semester (guard if missing)
+    const targetPane = document.getElementById('semester-' + semester);
+    if (targetPane) targetPane.classList.add('active');
 
-    // Update button styles (optional: you can add active styling to buttons too)
+    // Update button styles
     document.querySelectorAll('.semester-btn').forEach(btn => {
-      btn.classList.remove('btn-primary');
+      btn.classList.remove('btn-semester-active');
       btn.classList.add('btn-outline-primary');
     });
 
-    // Add active class to clicked button (optional)
-    event.target.classList.remove('btn-outline-primary');
-    event.target.classList.add('btn-primary');
+    // Add active class to clicked button
+    const btn = evt.currentTarget || evt.target;
+    if (btn) {
+      btn.classList.remove('btn-outline-primary');
+      btn.classList.add('btn-semester-active');
+    }
+
+    // Update the total amount display
+    const totalAmountElement = document.getElementById('total-amount');
+    const totalLabelElement = document.getElementById('total-label');
+
+    if (semester === 'all') {
+      totalAmountElement.textContent = '₱' + formatCurrency(tuitionAmount);
+      totalLabelElement.textContent = 'Total Calculated Tuition:';
+    } else if (semester === 'first') {
+      totalAmountElement.textContent = '₱' + formatCurrency(tuitionAmount);
+      totalLabelElement.textContent = 'First Semester Tuition:';
+    } else if (semester === 'second') {
+      totalAmountElement.textContent = '₱' + formatCurrency(tuitionAmount);
+      totalLabelElement.textContent = 'Second Semester Tuition:';
+    } else if (semester === 'other') {
+      totalAmountElement.textContent = '₱' + formatCurrency(tuitionAmount);
+      totalLabelElement.textContent = 'Other Subjects Tuition:';
+    }
+
+    // Update the tuition input field
+    const tuitionInput = document.getElementById('totalTuitionInput');
+    if (tuitionInput) tuitionInput.value = tuitionAmount;
+  }
+
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount ?? 0);
   }
 </script>
 </body>

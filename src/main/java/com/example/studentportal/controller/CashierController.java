@@ -115,13 +115,14 @@ public class CashierController {
     @PostMapping("/record/{id}")
     public String recordPayment(@PathVariable Long id,
                                 @RequestParam BigDecimal amount,
+                                @RequestParam String semester,
                                 @RequestParam(required = false) String method,
                                 @RequestParam(required = false) String reference,
                                 @RequestParam(required = false) String note,
                                 Principal principal) {
         User student = userService.findById(id).orElseThrow();
         User cashier = userService.findByEmail(principal.getName()).orElse(null); // current user
-        txService.record(student, cashier, amount, method, reference, note);
+        txService.record(student, cashier, amount, semester, method, reference, note);
         return "redirect:/cashier/student/" + id;
     }
 

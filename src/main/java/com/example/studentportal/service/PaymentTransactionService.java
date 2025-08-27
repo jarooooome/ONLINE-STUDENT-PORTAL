@@ -28,11 +28,12 @@ public class PaymentTransactionService {
 
     /** Record a payment (record only) and update balance + apply to oldest unpaid installments */
     @Transactional
-    public PaymentTransaction record(User student, User cashier, BigDecimal amount, String method, String reference, String note) {
+    public PaymentTransaction record(User student, User cashier, BigDecimal amount, String semester, String method, String reference, String note) {
         PaymentTransaction tx = new PaymentTransaction();
         tx.setStudent(student);
         tx.setRecordedBy(cashier);
         tx.setAmount(amount);
+        tx.setSemester(semester);
         tx.setMethod(method);
         tx.setReference(reference);
         tx.setNote(note);
@@ -41,6 +42,12 @@ public class PaymentTransactionService {
         balanceService.addToPaid(student, amount);
         balanceService.applyPaymentToInstallments(student, amount);
         return saved;
+    }
+
+    /** Record a payment without semester (backward compatibility) */
+    @Transactional
+    public PaymentTransaction record(User student, User cashier, BigDecimal amount, String method, String reference, String note) {
+        return record(student, cashier, amount, null, method, reference, note);
     }
 
     /** Update a transaction amount and adjust both balance and installment allocations */
@@ -65,6 +72,31 @@ public class PaymentTransactionService {
             // Simplest approach: clear paid flags and re-apply all transactions in order.
             // (Keeps code short; good enough for this use case.)
             recomputeInstallmentApplications(student);
+        }
+        return saved;
+    }
+
+    /** Update a transaction including semester */
+    @Transactional
+    public PaymentTransaction updateTransaction(Long txId, BigDecimal newAmount, String semester) {
+        PaymentTransaction tx = txRepo.findById(txId).orElseThrow();
+        BigDecimal old = tx.getAmount();
+
+        tx.setAmount(newAmount);
+        tx.setSemester(semester);
+        PaymentTransaction saved = txRepo.save(tx);
+
+        // Adjust balance if amount changed
+        if (newAmount.compareTo(old) != 0) {
+            User student = tx.getStudent();
+            BigDecimal delta = newAmount.subtract(old);
+            if (delta.compareTo(BigDecimal.ZERO) > 0) {
+                balanceService.addToPaid(student, delta);
+                balanceService.applyPaymentToInstallments(student, delta);
+            } else if (delta.compareTo(BigDecimal.ZERO) < 0) {
+                balanceService.subtractFromPaid(student, delta.negate());
+                recomputeInstallmentApplications(student);
+            }
         }
         return saved;
     }
@@ -96,5 +128,20 @@ public class PaymentTransactionService {
         all.stream()
                 .sorted((a,b) -> a.getRecordedAt().compareTo(b.getRecordedAt()))
                 .forEach(t -> balanceService.applyPaymentToInstallments(student, t.getAmount()));
+    }
+
+    /** Find transactions by student and semester */
+    @Transactional(readOnly = true)
+    public List<PaymentTransaction> findByStudentAndSemester(User student, String semester) {
+        return txRepo.findByStudentAndSemesterOrderByRecordedAtDesc(student, semester);
+    }
+
+    /** Get total payments by semester for a student */
+    @Transactional(readOnly = true)
+    public BigDecimal getTotalPaymentsBySemester(User student, String semester) {
+        List<PaymentTransaction> transactions = txRepo.findByStudentAndSemester(student, semester);
+        return transactions.stream()
+                .map(PaymentTransaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
